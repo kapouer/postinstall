@@ -31,10 +31,11 @@ function processCommand(obj) {
 	var srcPath = resolvePkg(obj.input) || Path.resolve(obj.input);
 	var srcFile = Path.basename(srcPath);
 
+
 	var commandFn;
-	try {
+	if (obj.command == "link" || obj.command == "copy" || obj.command == "concat") {
 		commandFn = require(`../commands/${obj.command}`);
-	} catch(ex) {
+	} else {
 		commandFn = require(`postinstall-${obj.command}`);
 	}
 
@@ -57,7 +58,13 @@ function processCommand(obj) {
 			noglobstar: true,
 			noext: true
 		}).then(function(paths) {
-			if (bundle) return commandFn(paths, obj.output, obj.options);
+			var list = paths;
+			if (paths.length == 1 && obj.options.list) {
+				list = obj.options.list.map(function(path) {
+					return Path.join(paths[0], path);
+				});
+			}
+			if (bundle || obj.options.list) return commandFn(list, obj.output, obj.options);
 			return Promise.all(paths.map(function(input) {
 				var outputFile;
 				if (star) {
@@ -73,8 +80,7 @@ function processCommand(obj) {
 				} else {
 					outputFile = destFile || srcFile;
 				}
-
-				return commandFn(input, Path.join(destDir, outputFile), obj.options);
+				return commandFn([input], Path.join(destDir, outputFile), obj.options);
 			}));
 		});
 	});

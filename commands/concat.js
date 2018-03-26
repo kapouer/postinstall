@@ -1,9 +1,10 @@
 var fs = require("fs");
 
-module.exports = function(srcPaths, destPath) {
-	var to = fs.createWriteStream(destPath, {flags: 'a'});
+module.exports = function(inputs, output, options) {
+	var to = fs.createWriteStream(output, {flags: 'a'});
+	inputs = inputs.slice();
 	return new Promise(function(resolve, reject) {
-		write(srcPaths, to, resolve, reject);
+		write(inputs, to, resolve, reject);
 	});
 };
 

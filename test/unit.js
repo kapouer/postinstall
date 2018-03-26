@@ -22,6 +22,9 @@ describe("Unit tests", function suite() {
 				}, {
 					path: 'dest/four.min.css',
 					data: "/* four */\n"
+				}, {
+					path: 'dest/texts.txt',
+					data: "text2\ntext1\n"
 				}]);
 			});
 		});

@@ -71,20 +71,36 @@ Syntax
 Short form
 ```
 postinstall: {
-	"<module>/<glob>": "<command> <output>"
+	"<module>/<input>": "<command> <output>"
 }
 ```
 
 Long form
 ```
 postinstall: {
-	"<module>/<glob>": {
+	"<module>/<input>": {
 		"command": "<command>",
 		"output": "<output>",
 		"<option>": "<value>"
 	}
 }
 ```
+
+input can be a path, with an optional star in its filename
+output can be a path, with an option star in its filename.
+
+This allows commands to receive multiple files for one output.
+If a command really need to process files in a specific order,
+one should use the long form option `list` like this:
+
+```
+"src/": {
+	"command": "concat",
+	"output": "dest/bundle.js",
+	"list": ["two.js", "one.js"]
+}
+```
+
 
 Command
 -------
@@ -93,11 +109,13 @@ New commands can be added to postinstall and they just need to be available
 as `postinstall-<command>` modules exporting a single function:
 
 ```
-module.exports = function(input, output, options) {
-	// input and output are valid paths, options is an object (possibly empty)
+module.exports = function(inputs, output, options) {
+	// inputs is an array of paths
+	// output is a path
+	// options is an object (possibly empty)
 	// can return promise
 };
 ```
 
-Bundled commands: link, copy.
+Bundled commands: link, copy, concat (accepts glob or `list` option).
 
