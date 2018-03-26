@@ -41,27 +41,42 @@ function processCommand(obj) {
 	var destDir, destFile;
 	if (obj.output.endsWith('/')) {
 		destDir = obj.output;
-		destFile = Path.join(obj.output, srcFile);
 	} else {
 		destDir = Path.dirname(obj.output);
-		destFile = obj.output;
+		destFile = Path.basename(obj.output);
 	}
+
+	var star = srcFile.indexOf('*') >= 0;
+	var bundle = star && destFile && destFile.indexOf('*') < 0;
 
 	assertRooted(process.cwd(), destDir);
 	return mkdirp(destDir).then(function() {
-		if (srcFile == "*") {
-			return glob(srcPath, {
-				nosort: true,
-				nobrace: true,
-				noglobstar: true
-			}).then(function(paths) {
-				return Promise.all(paths.map(function(onePath) {
-					return commandFn(onePath, Path.join(destDir, Path.basename(onePath)), obj.options);
-				}));
-			});
-		} else {
-			return commandFn(srcPath, destFile, obj.options);
-		}
+		return glob(srcPath, {
+			nosort: true,
+			nobrace: true,
+			noglobstar: true,
+			noext: true
+		}).then(function(paths) {
+			if (bundle) return commandFn(paths, obj.output, obj.options);
+			return Promise.all(paths.map(function(input) {
+				var outputFile;
+				if (star) {
+					var inputFile = Path.basename(input);
+					if (!destFile) {
+						outputFile = inputFile;
+					} else { // bundle == false
+						// replace * in destFile by the match in input basename
+						var reg = new RegExp(srcFile.replace('*', '(\\w+)'));
+						var part = reg.exec(inputFile)[1];
+						outputFile = destFile.replace('*', part);
+					}
+				} else {
+					outputFile = destFile || srcFile;
+				}
+
+				return commandFn(input, Path.join(destDir, outputFile), obj.options);
+			}));
+		});
 	});
 }
 

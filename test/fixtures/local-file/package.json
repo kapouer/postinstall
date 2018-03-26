@@ -5,7 +5,8 @@
   },
   "postinstall": {
     "./src.js": "link dst.js",
-    "./src/other.js": "copy dest/file.js"
+    "./src/other.js": "copy dest/file.js",
+    "./lib/*.js": "link dest/*.min.js"
   },
   "dependencies": {
     "postinstall": "../../../"
