@@ -1,6 +1,5 @@
 var common = require('./common');
 
-
 describe("Unit tests", function suite() {
 	this.timeout(10000);
 	before(function() {
@@ -13,7 +12,18 @@ describe("Unit tests", function suite() {
 
 	it("should install local file link and copy", function() {
 		return common.cmd("local-file", "install").then(function({dir, pkg}) {
-			return common.check(dir, pkg);
+			return common.check(dir, pkg).then(function() {
+				return common.checkFiles(dir, [{
+					path: 'dest/bundle.js',
+					data: "// one\n// two\n"
+				}, {
+					path: 'dest/three.min.css',
+					data: "/* three */\n"
+				}, {
+					path: 'dest/four.min.css',
+					data: "/* four */\n"
+				}]);
+			});
 		});
 	});
 

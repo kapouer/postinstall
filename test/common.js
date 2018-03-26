@@ -15,6 +15,14 @@ var postinstall = require('../');
 
 var tmpDir = Path.join(__dirname, "tmp");
 
+exports.checkFiles = function(dir, list) {
+	return Promise.all(list.map(function(test) {
+		return fs.readFile(Path.join(dir, test.path)).then(function(buf) {
+			assert.equal(buf.toString(), test.data);
+		});
+	}));
+};
+
 exports.check = function(dir, pkg) {
 	var commands = postinstall.prepare(pkg.postinstall || {});
 	return Promise.all(commands.map(function(obj) {
