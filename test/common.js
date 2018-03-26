@@ -7,14 +7,16 @@ var Path = require('path');
 var ncp = pify(require('ncp').ncp);
 var glob = pify(require('glob'));
 var assert = require('assert');
+var postinstall = require('../');
 
 var tmpDir = Path.join(__dirname, "tmp");
 
 exports.checkLinks = function(dir, pkg) {
-	return Promise.all(Object.keys(pkg.postinstall).map(function(key) {
-		var dest = Path.join(dir, pkg.postinstall[key]);
+	var commands = postinstall.prepare(pkg.postinstall || {});
+	return Promise.all(commands.map(function(obj) {
+		var dest = Path.join(dir, obj.output);
 		var count = 0;
-		if (key.endsWith('*')) {
+		if (obj.input.endsWith('*')) {
 			return glob(Path.join(dest, '*'), {
 				nosort: true,
 				nobrace: true,

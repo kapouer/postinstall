@@ -4,57 +4,47 @@ var pify = require('util').promisify;
 var glob = pify(require('glob'));
 var mkdirp = pify(require('mkdirp'));
 var resolvePkg = require('resolve-pkg');
+var postinstall = require('../');
 
 var readFile = pify(require("fs").readFile);
 
 var Path = require('path');
 
-readFile('package.json').then(function(data) {
+var argv = process.argv;
+var configFile = argv.length > 0 && argv[argv.length - 1] || "package.json";
+
+readFile(configFile).then(function(data) {
 	var obj = JSON.parse(data);
-	return Promise.all(Object.keys(obj.postinstall || {}).map(function(key) {
-		var line = obj.postinstall[key];
+	var commands = postinstall.prepare(obj.postinstall || {});
+	return Promise.all(commands.map(function(obj) {
 		return Promise.resolve().then(function() {
-			processKeyVal(key, line);
+			processCommand(obj);
 		}).catch(function(err) {
-			console.error(`postinstall error, skipping ${key}`, err);
+			console.error(`postinstall error, skipping ${obj.command} ${obj.input}`, err);
 		});
 	}));
 }).catch(function(err) {
 	console.error(err);
 });
 
-function processKeyVal(key, line) {
-	var srcPath = resolvePkg(key) || Path.resolve(key);
+function processCommand(obj) {
+	var srcPath = resolvePkg(obj.input) || Path.resolve(obj.input);
 	var srcFile = Path.basename(srcPath);
 
-	var command, destPath, opts;
-
-	if (typeof line == "object") {
-		command = line.command;
-		destPath = line.output;
-		delete line.command;
-		delete line.output;
-		opts = line;
-	} else {
-		var parts = line.split(' ');
-		command = parts.shift();
-		destPath = parts.join(' ');
-		opts = {};
-	}
 	var commandFn;
 	try {
-		commandFn = require(`../commands/${command}`);
+		commandFn = require(`../commands/${obj.command}`);
 	} catch(ex) {
-		commandFn = require(`postinstall-${command}`);
+		commandFn = require(`postinstall-${obj.command}`);
 	}
 
 	var destDir, destFile;
-	if (destPath.endsWith('/')) {
-		destDir = destPath;
-		destFile = Path.join(destPath, srcFile);
+	if (obj.output.endsWith('/')) {
+		destDir = obj.output;
+		destFile = Path.join(obj.output, srcFile);
 	} else {
-		destDir = Path.dirname(destPath);
-		destFile = destPath;
+		destDir = Path.dirname(obj.output);
+		destFile = obj.output;
 	}
 
 	assertRooted(process.cwd(), destDir);
@@ -66,11 +56,11 @@ function processKeyVal(key, line) {
 				noglobstar: true
 			}).then(function(paths) {
 				return Promise.all(paths.map(function(onePath) {
-					return commandFn(onePath, Path.join(destDir, Path.basename(onePath)), opts);
+					return commandFn(onePath, Path.join(destDir, Path.basename(onePath)), obj.options);
 				}));
 			});
 		} else {
-			return commandFn(srcPath, destFile, opts);
+			return commandFn(srcPath, destFile, obj.options);
 		}
 	});
 }
@@ -81,13 +71,3 @@ function assertRooted(root, path) {
 	}
 }
 
-function findModuleRoot(resolvedPath, moduleName) {
-	moduleName = moduleName.split('/').pop();
-	if (resolvedPath.endsWith(moduleName)) {
-		return resolvedPath;
-	} else {
-		var dir = Path.dirname(resolvedPath);
-		if (dir == resolvedPath) throw new Error("Cannot find module root: " + moduleName);
-		return findModuleRoot(dir, moduleName);
-	}
-}
