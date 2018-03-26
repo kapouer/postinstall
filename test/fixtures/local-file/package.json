@@ -6,7 +6,8 @@
   "postinstall": {
     "./src.js": "link dst.js",
     "./src/other.js": "copy dest/file.js",
-    "./lib/*.js": "link dest/*.min.js"
+    "./lib/*.js": "link dest/*.min.js",
+    "./lib/*.js": "concat dest/bundle.js"
   },
   "dependencies": {
     "postinstall": "../../../"
