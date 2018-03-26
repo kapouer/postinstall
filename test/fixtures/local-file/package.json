@@ -4,7 +4,8 @@
     "postinstall": "postinstall"
   },
   "postinstall": {
-    "./src.js": "link dst.js"
+    "./src.js": "link dst.js",
+    "./src/other.js": "copy dest/file.js"
   },
   "dependencies": {
     "postinstall": "../../../"

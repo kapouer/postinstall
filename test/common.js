@@ -15,35 +15,32 @@ var postinstall = require('../');
 
 var tmpDir = Path.join(__dirname, "tmp");
 
-exports.checkLinks = function(dir, pkg) {
+exports.check = function(dir, pkg) {
 	var commands = postinstall.prepare(pkg.postinstall || {});
 	return Promise.all(commands.map(function(obj) {
 		var dest = Path.join(dir, obj.output);
 		var count = 0;
-		if (obj.input.endsWith('*')) {
-			return glob(Path.join(dest, '*'), {
+		return Promise.resolve().then(function() {
+			if (obj.input.endsWith('*')) return glob(Path.join(dest, '*'), {
 				nosort: true,
 				nobrace: true,
 				noglobstar: true,
-			}).then(function(files) {
-				return Promise.all(files.map(function(file) {
-					return fs.lstat(file).then(function(stat) {
-						count++;
+			});
+			else return [dest]
+		}).then(function(files) {
+			return Promise.all(files.map(function(file) {
+				return fs.lstat(file).then(function(stat) {
+					count++;
+					if (obj.command == "link") {
 						assert.ok(stat.isSymbolicLink(), `is symbolic link ${file}`);
-					});
-				}));
-			}).then(function() {
-				assert.ok(count >= 2, "at least two files should have been installed");
+					}
+				}).catch(function(err) {
+					assert.ifError(err);
+				});
+			})).then(function() {
+				assert.ok(count == files.length, `${count} files should have been installed`);
 			});
-		} else {
-			// check path is a symlink
-			return fs.lstat(dest).then(function(stat) {
-				count++;
-				assert.ok(stat.isSymbolicLink(), `is symbolic link ${dest}`);
-			}).then(function() {
-				assert.ok(count == 1, "one file should have been installed");
-			});
-		}
+		});
 	}));
 };
 
