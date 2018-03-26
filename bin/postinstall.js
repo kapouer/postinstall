@@ -11,7 +11,7 @@ var readFile = pify(require("fs").readFile);
 var Path = require('path');
 
 var argv = process.argv;
-var configFile = argv.length > 0 && argv[argv.length - 1] || "package.json";
+var configFile = argv.length == 3 && argv[2] || "package.json";
 
 readFile(configFile).then(function(data) {
 	var obj = JSON.parse(data);
