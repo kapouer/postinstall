@@ -9,12 +9,25 @@ How
 Depend on this package:
 `npm install postinstall --save`
 
-
-and declare transformations in package.json:
+Declare postinstall script in package.json:
 
 ```
 {
-  ../..
+  "name": "mypkg",
+  "version": "1.0.0",
+  "dependencies": {
+    "postinstall": "1"
+  },
+  "scripts": {
+    "postinstall": "postinstall"
+  }
+}
+```
+
+From there, more dependencies and commands can be added:
+
+```
+{
   "dependencies": {
     "jquery": "3",
     "postinstall": "1"
@@ -26,35 +39,34 @@ and declare transformations in package.json:
   "scripts": {
     "postinstall": "postinstall"
   }
-  ../..
 }
 ```
 
+It is also possible to configure postinstall in another json file:
+
+```
+{
+  "dependencies": {
+    "jquery": "3",
+    "postinstall": "1"
+  },
+  "scripts": {
+    "postinstall": "postinstall postinstall.json"
+  }
+}
+```
+
+with postinstall.json containing:
+```
+"postinstall": {
+  "jquery/dist/jquery.slim.min.js": "link public/js/jquery.min.js",
+  "jquery/dist/jquery.slim.min.map": "link public/js/jquery.min.js.map"
+}
+```
+
+
 Syntax
 ------
-
-## ini-style in .postinstall
-
-Commands are shorthands with working default values:
-
-```
-[postinstall]
-<module>/<glob> = <command> <output>
-```
-
-Commands are available through installation of `postinstall-<command>` packages.
-
-Each command receives the globbed paths and an object with options.
-
-Long form syntax is:
-```
-[postinstall.<module>/<glob>]
-command = <command>
-output = <output>
-<option> = <value>
-```
-
-## json-style in package.json
 
 Short form
 ```
