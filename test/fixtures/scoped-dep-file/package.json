@@ -1,7 +1,7 @@
 {
   "name": "scoped-dep-file",
   "scripts": {
-    "postinstall": "postinstall-links"
+    "postinstall": "postinstall"
   },
   "postinstall": {
     "@scope/sample/dist/test.js": "link test.js"

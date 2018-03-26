@@ -1,5 +1,9 @@
-var pify = require('pify');
-var fs = pify(require('fs'));
+var pify = require('util').promisify;
+var fs = require('fs');
+fs = {
+	lstat: pify(fs.lstat),
+	readFile: pify(fs.readFile)
+};
 var rimraf = pify(require('rimraf'));
 var mkdirp = pify(require('mkdirp'));
 var spawn = require('spawn-please');
