@@ -18,6 +18,9 @@ var tmpDir = Path.join(__dirname, "tmp");
 exports.check = function(dir, pkg) {
 	var commands = postinstall.prepare(pkg.postinstall || {});
 	return Promise.all(commands.map(function(obj) {
+		if (obj.output.indexOf('*') >= 0) {
+			return;
+		}
 		var dest = Path.join(dir, obj.output);
 		var count = 0;
 		return Promise.resolve().then(function() {
