@@ -16,7 +16,7 @@ Declare postinstall script in package.json:
   "name": "mypkg",
   "version": "1.0.0",
   "dependencies": {
-    "postinstall": "1"
+    "postinstall": "*"
   },
   "scripts": {
     "postinstall": "postinstall"
@@ -30,7 +30,7 @@ From there, more dependencies and commands can be added:
 {
   "dependencies": {
     "jquery": "3",
-    "postinstall": "1"
+    "postinstall": "*"
   },
   "postinstall": {
     "jquery/dist/jquery.slim.min.js": "link public/js/jquery.min.js",
@@ -46,17 +46,13 @@ It is also possible to configure postinstall in another json file:
 
 ```
 {
-  "dependencies": {
-    "jquery": "3",
-    "postinstall": "1"
-  },
   "scripts": {
-    "postinstall": "postinstall postinstall.json"
+    "postinstall": "postinstall myconfig.json"
   }
 }
 ```
 
-with postinstall.json containing:
+Here myconfig.json contains:
 ```
 "postinstall": {
   "jquery/dist/jquery.slim.min.js": "link public/js/jquery.min.js",
@@ -68,14 +64,14 @@ with postinstall.json containing:
 Syntax
 ------
 
-Short form
+### Short form
 ```
 postinstall: {
 	"<module>/<input>": "<command> <output>"
 }
 ```
 
-Long form
+### Long form
 ```
 postinstall: {
 	"<module>/<input>": {
@@ -86,12 +82,16 @@ postinstall: {
 }
 ```
 
-input can be a path, with an optional star in its filename
-output can be a path, with an option star in its filename.
+input can be a path, with an optional star in its filename.
+
+output can be a path, with an optional star in its filename.
 
 This allows commands to receive multiple files for one output.
-If a command really need to process files in a specific order,
-one should use the long form option `list` like this:
+
+### List option
+
+If a command needs to process files in a specific order, the list of files
+can be given in the long form option `list`, like this:
 
 ```
 "src/": {
@@ -100,6 +100,21 @@ one should use the long form option `list` like this:
 	"list": ["two.js", "one.js"]
 }
 ```
+
+This calls `concat(["src/two.js", "src/one.js"], "dest/bundle.js")`.
+
+### Renaming
+
+If a star is present in both input and output file names, it is interpreted
+as renaming the input file(s) name(s):
+
+```
+"postinstall": {
+  "jquery/dist/*.slim.min.js": "link public/js/*.min.js"
+}
+```
+
+This will produce the same inputs/outputs as the first example.
 
 
 Command
@@ -117,5 +132,8 @@ module.exports = function(inputs, output, options) {
 };
 ```
 
-Bundled commands: link, copy, concat (accepts glob or `list` option).
+Bundled commands: link, copy, concat.
+
+Supported commands: js, css (postinstall-js, postinstall-css) are compilers and
+minifiers for preparing files for browsers.
 
