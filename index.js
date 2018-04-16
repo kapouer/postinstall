@@ -70,6 +70,7 @@ function processCommand(obj) {
 			noglobstar: true,
 			noext: true
 		}).then(function(paths) {
+			if (paths.length == 0) throw new Error("No files found at " + srcPath);
 			var list = paths;
 			if (paths.length == 1 && obj.options.list) {
 				list = obj.options.list.map(function(path) {
