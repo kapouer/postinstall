@@ -33,9 +33,7 @@ exports.process = function(config) {
 	var commands = exports.prepare(config);
 	return Promise.all(commands.map(function(obj) {
 		return Promise.resolve().then(function() {
-			processCommand(obj);
-		}).catch(function(err) {
-			console.error(`postinstall error, skipping ${obj.command} ${obj.input}`, err);
+			return processCommand(obj);
 		});
 	}));
 };

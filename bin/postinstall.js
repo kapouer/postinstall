@@ -13,5 +13,6 @@ readFile(configFile).then(function(data) {
 	return postinstall.process(obj.postinstall || {});
 }).catch(function(err) {
 	console.error(err);
+	process.exit(1);
 });
 

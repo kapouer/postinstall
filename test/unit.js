@@ -58,4 +58,13 @@ describe("Unit tests", function suite() {
 		});
 	});
 
+	it("should throw when nothing matches", function() {
+		var err = null;
+		return common.cmd("throw", "install").catch(function(ex) {
+			err = ex;
+		}).then(function(what) {
+			if (!err) throw new Error("Did not throw");
+		});
+	});
+
 });

@@ -75,14 +75,13 @@ function run(dir, cmd) {
 			PATH: process.env.PATH,
 			npm_config_userconfig: '', // attempt to disable user config
 			npm_config_ignore_scripts: 'false',
-			npm_config_loglevel: 'info',
+			npm_config_loglevel: 'error',
 			npm_config_progress: 'false',
 			npm_config_package_lock: 'false',
 			npm_config_only: 'prod',
 			npm_config_offline: 'true'
 		}
 	}).then(function(out) {
-		if (out) console.log(out);
 		return fs.readFile(Path.join(dir, 'package.json')).then(function(buf) {
 			return {dir: dir, pkg: JSON.parse(buf)};
 		});
