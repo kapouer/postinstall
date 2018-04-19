@@ -25,6 +25,12 @@ describe("Unit tests", function suite() {
 				}, {
 					path: 'dest/texts.txt',
 					data: "text2\ntext1\n"
+				}, {
+					path: 'dest/rec/other.js',
+					data: "// something\n"
+				}, {
+					path: 'dest/rec/dir/deep/test.js',
+					data: "console.log('test.js')\n"
 				}]);
 			});
 		});
