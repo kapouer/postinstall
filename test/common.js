@@ -1,14 +1,7 @@
 var pify = require('util').promisify;
-var fs = require('fs');
-fs = {
-	lstat: pify(fs.lstat),
-	readFile: pify(fs.readFile)
-};
-var rimraf = pify(require('rimraf'));
-var mkdirp = pify(require('mkdirp'));
+var fs = require('fs-extra');
 var spawn = require('spawn-please');
 var Path = require('path');
-var ncp = pify(require('ncp').ncp);
 var glob = pify(require('glob'));
 var assert = require('assert');
 var postinstall = require('../');
@@ -56,8 +49,8 @@ exports.check = function(dir, pkg) {
 };
 
 exports.prepare = function() {
-	return rimraf(tmpDir).then(function() {
-		return ncp(Path.join(__dirname, "fixtures"), tmpDir);
+	return fs.remove(tmpDir).then(function() {
+		return fs.copy(Path.join(__dirname, "fixtures"), tmpDir);
 	});
 };
 

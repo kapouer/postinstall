@@ -1,15 +1,13 @@
 #!/usr/bin/node
 
-var pify = require('util').promisify;
 var postinstall = require('../');
 
-var readFile = pify(require("fs").readFile);
+var fs = require('fs-extra');
 
 var argv = process.argv;
 var configFile = argv.length == 3 && argv[2] || "package.json";
 
-readFile(configFile).then(function(data) {
-	var obj = JSON.parse(data);
+fs.readJson(configFile).then(function(obj) {
 	return postinstall.process(obj.postinstall || {});
 }).catch(function(err) {
 	console.error(err);

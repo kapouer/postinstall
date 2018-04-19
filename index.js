@@ -1,6 +1,6 @@
 var pify = require('util').promisify;
 var glob = pify(require('glob'));
-var mkdirp = pify(require('mkdirp'));
+var fs = require('fs-extra');
 var resolvePkg = require('resolve-pkg');
 var Path = require('path');
 
@@ -61,7 +61,7 @@ function processCommand(obj) {
 	var bundle = star && destFile && destFile.indexOf('*') < 0;
 
 	assertRooted(process.cwd(), destDir);
-	return mkdirp(destDir).then(function() {
+	return fs.ensureDir(destDir).then(function() {
 		return glob(srcPath, {
 			nosort: true,
 			nobrace: true,
