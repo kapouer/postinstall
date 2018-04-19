@@ -1,12 +1,4 @@
-var fs = require("fs");
-var pify = require('util').promisify;
-
-fs = {
-	access: pify(fs.access),
-	lstat: pify(fs.lstat),
-	unlink: pify(fs.unlink),
-	symlink: pify(fs.symlink)
-};
+var fs = require("fs-extra");
 
 module.exports = function(inputs, output) {
 	if (inputs.length > 1) {
