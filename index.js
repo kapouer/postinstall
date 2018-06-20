@@ -3,6 +3,7 @@ var glob = pify(require('glob'));
 var fs = require('fs-extra');
 var resolvePkg = require('resolve-pkg');
 var Path = require('path');
+var minimist = require('minimist');
 
 exports.prepare = function(obj) {
 	return Object.keys(obj).map(function(key) {
@@ -15,10 +16,17 @@ exports.prepare = function(obj) {
 			delete opts.command;
 			delete opts.output;
 		} else {
-			var parts = line.split(' ');
-			command = parts.shift();
-			output = parts.join(' ');
-			opts = {};
+			var args = minimist(line.split(' '));
+			if (args._.length == 2) {
+				command = args._[0];
+				output = args._[1];
+			}
+			delete args._;
+			opts = args;
+		}
+		if (!command || !output) {
+			console.error("Cannot parse postinstall command", line);
+			return;
 		}
 		return {
 			command: command,
@@ -32,6 +40,7 @@ exports.prepare = function(obj) {
 exports.process = function(config) {
 	var commands = exports.prepare(config);
 	return Promise.all(commands.map(function(obj) {
+		if (!obj) return;
 		return Promise.resolve().then(function() {
 			return processCommand(obj);
 		});
