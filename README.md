@@ -67,7 +67,7 @@ Syntax
 ### Short form
 ```
 postinstall: {
-	"<module>/<input>": "<command> <output>"
+	"<module>/<input>": "<command> --<option>=<value> <output>"
 }
 ```
 
