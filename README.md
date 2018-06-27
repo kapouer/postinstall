@@ -134,6 +134,7 @@ module.exports = function(inputs, output, options) {
 
 Bundled commands: link, copy, concat.
 
-Supported commands: js, css (postinstall-js, postinstall-css) are compilers and
-minifiers for preparing files for browsers.
+Supported commands:
+- zero-config compilers/minifiers: js, css (postinstall-js, postinstall-css)
+- browserify (postinstall-browserify)
 
