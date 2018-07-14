@@ -149,7 +149,11 @@ Supported commands:
 Using as a module
 -----------------
 
-`opts` accepts the same options as the cli options.
+`opts` accepts the same options as the cli options and also:
+
+* `cwd`  
+  resolves paths and modules relative to this directory.  
+  Defaults to `process.cwd()`. Cannot be set from cli.
 
 ```
 var postinstall = require('postinstall');

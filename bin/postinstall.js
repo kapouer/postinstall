@@ -12,6 +12,7 @@ var opts = minimist(process.argv, {
 });
 if (opts.allow && typeof opts.allow == "string") opts.allow = [opts.allow];
 delete opts.a;
+delete opts.cwd;
 
 var configFile = opts._.length == 3 && opts._[2] || "package.json";
 delete opts._;

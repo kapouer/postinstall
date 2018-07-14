@@ -45,17 +45,22 @@ exports.prepare = function(obj, globalOpts) {
 };
 
 exports.process = function(config, opts) {
-	var commands = exports.prepare(config, opts || {});
+	if (!opts) opts = {};
+	var commands = exports.prepare(config, opts);
 	return Promise.all(commands.map(function(obj) {
 		if (!obj) return;
 		return Promise.resolve().then(function() {
-			return processCommand(obj);
+			return processCommand(obj, opts);
 		});
 	}));
 };
 
-function processCommand(obj) {
-	var srcPath = resolvePkg(obj.input) || Path.resolve(obj.input);
+function processCommand(obj, opts) {
+	if (!opts.cwd) opts.cwd = process.cwd();
+	var srcPath = resolvePkg(obj.input, {
+		cwd: opts.cwd
+	});
+	if (!srcPath) srcPath = Path.resolve(opts.cwd, obj.input);
 	var srcFile = Path.basename(srcPath);
 
 	var commandFn;
@@ -76,7 +81,9 @@ function processCommand(obj) {
 	var star = srcFile.indexOf('*') >= 0;
 	var bundle = star && destFile && destFile.indexOf('*') < 0;
 
-	assertRooted(process.cwd(), destDir);
+	destDir = Path.resolve(opts.cwd, destDir);
+	assertRooted(opts.cwd, destDir);
+
 	return fs.ensureDir(destDir).then(function() {
 		return glob(srcPath, {
 			nosort: true,
