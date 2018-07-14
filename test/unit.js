@@ -82,4 +82,17 @@ describe("Unit tests", function suite() {
 		});
 	});
 
+	it("should run postinstall module with cwd set properly", function() {
+		return common.cmd("ignore-scripts", ["install", "--ignore-scripts"]).then(function({dir, pkg}) {
+			var cwd = './test/tmp/ignore-scripts';
+			return require('../').process(require('./tmp/ignore-scripts/package.json').postinstall, {
+				cwd: cwd
+			}).then(function() {
+				return common.check(dir, pkg, {cwd: cwd}).then(function(count) {
+					assert.equal(1, count);
+				});
+			});
+		});
+	});
+
 });
