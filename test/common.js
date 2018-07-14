@@ -16,9 +16,13 @@ exports.checkFiles = function(dir, list) {
 	}));
 };
 
-exports.check = function(dir, pkg) {
-	var commands = postinstall.prepare(pkg.postinstall || {});
+exports.check = function(dir, pkg, opts) {
+	var commands = postinstall.prepare(pkg.postinstall || {}, opts || {});
+	var countCommands = 0;
 	return Promise.all(commands.map(function(obj) {
+		if (!obj) {
+			return;
+		}
 		if (obj.output.indexOf('*') >= 0) {
 			return;
 		}
@@ -44,8 +48,12 @@ exports.check = function(dir, pkg) {
 			})).then(function() {
 				assert.ok(count == files.length, `${count} files should have been installed`);
 			});
+		}).then(function() {
+			countCommands++;
 		});
-	}));
+	})).then(function() {
+		return countCommands;
+	});
 };
 
 exports.prepare = function() {

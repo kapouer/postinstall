@@ -1,4 +1,5 @@
 var common = require('./common');
+var assert = require('assert');
 
 describe("Unit tests", function suite() {
 	this.timeout(10000);
@@ -70,6 +71,14 @@ describe("Unit tests", function suite() {
 			err = ex;
 		}).then(function(what) {
 			if (!err) throw new Error("Did not throw");
+		});
+	});
+
+	it("should not execute not whitelisted commands", function() {
+		return common.cmd("whitelist", "install").then(function({dir, pkg}) {
+			return common.check(dir, pkg, {allow: ['link']}).then(function(count) {
+				assert.equal(1, count); // 1 because the star is not yet checked
+			});
 		});
 	});
 

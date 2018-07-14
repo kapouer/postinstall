@@ -60,6 +60,13 @@ Here myconfig.json contains:
 }
 ```
 
+Options
+-------
+
+* `--allow`, `-a`  
+  an array of allowed commands. `postinstall -a link -a copy`  
+  by default all commands are allowed.
+
 
 Syntax
 ------
