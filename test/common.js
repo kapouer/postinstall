@@ -80,7 +80,8 @@ function run(dir, cmd) {
 			npm_config_progress: 'false',
 			npm_config_package_lock: 'false',
 			npm_config_only: 'prod',
-			npm_config_offline: 'true'
+			npm_config_offline: 'true',
+			npm_config_audit: 'false'
 		}
 	}).then(function(out) {
 		return fs.readFile(Path.join(dir, 'package.json')).then(function(buf) {
