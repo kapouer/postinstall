@@ -28,6 +28,13 @@ exports.prepare = function(obj, globalOpts) {
 			console.error("Cannot parse postinstall command", line);
 			return;
 		}
+
+		if (globalOpts.allow) {
+			if (!globalOpts.allow.includes(command)) {
+				console.error("Unauthorized postinstall command", command);
+				return;
+			}
+		}
 		return {
 			command: command,
 			output: output,

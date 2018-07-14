@@ -6,7 +6,12 @@ var fs = require('fs-extra');
 var minimist = require('minimist');
 
 var opts = minimist(process.argv, {
+	alias: {
+		allow: 'a'
+	}
 });
+if (opts.allow && typeof opts.allow == "string") opts.allow = [opts.allow];
+delete opts.a;
 
 var configFile = opts._.length == 3 && opts._[2] || "package.json";
 delete opts._;
