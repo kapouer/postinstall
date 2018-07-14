@@ -5,7 +5,7 @@ var resolvePkg = require('resolve-pkg');
 var Path = require('path');
 var minimist = require('minimist');
 
-exports.prepare = function(obj) {
+exports.prepare = function(obj, globalOpts) {
 	return Object.keys(obj).map(function(key) {
 		var line = obj[key];
 		var command, output, opts;
@@ -37,8 +37,8 @@ exports.prepare = function(obj) {
 	});
 };
 
-exports.process = function(config) {
-	var commands = exports.prepare(config);
+exports.process = function(config, opts) {
+	var commands = exports.prepare(config, opts || {});
 	return Promise.all(commands.map(function(obj) {
 		if (!obj) return;
 		return Promise.resolve().then(function() {
