@@ -64,8 +64,8 @@ Options
 -------
 
 * `--allow`, `-a`  
-  an array of allowed commands. `postinstall -a link -a copy`  
-  by default all commands are allowed.
+  an array of allowed commands. `postinstall -a link -a copy`.  
+  When unset, all commands are allowed.
 
 
 Syntax
