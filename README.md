@@ -65,7 +65,7 @@ Options
 
 * `--allow`, `-a`  
   an array of allowed commands. `postinstall -a link -a copy`.  
-  When unset, all commands are allowed.
+  When unset, all commands are allowed. Available since version 0.3.0.
 
 
 Syntax
@@ -153,7 +153,8 @@ Using as a module
 
 * `cwd`  
   resolves paths and modules relative to this directory.  
-  Defaults to `process.cwd()`. Cannot be set from cli.
+  Defaults to `process.cwd()`.  
+  Cannot be set from cli. Available since version 0.4.0.
 
 ```
 var postinstall = require('postinstall');
