@@ -57,6 +57,8 @@ exports.process = function(config, opts) {
 
 function processCommand(obj, opts) {
 	if (!opts.cwd) opts.cwd = process.cwd();
+	else opts.cwd = Path.resolve(opts.cwd);
+
 	var srcPath = resolvePkg(obj.input, {
 		cwd: opts.cwd
 	});
