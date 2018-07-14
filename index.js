@@ -1,6 +1,7 @@
 var pify = require('util').promisify;
 var glob = pify(require('glob'));
 var fs = require('fs-extra');
+var resolveFrom = require('resolve-from');
 var resolvePkg = require('resolve-pkg');
 var Path = require('path');
 var minimist = require('minimist');
@@ -69,7 +70,7 @@ function processCommand(obj, opts) {
 	if (obj.command == "link" || obj.command == "copy" || obj.command == "concat") {
 		commandFn = require(`./commands/${obj.command}`);
 	} else {
-		commandFn = require(`postinstall-${obj.command}`);
+		commandFn = require(resolveFrom(opts.cwd, `postinstall-${obj.command}`));
 	}
 
 	var destDir, destFile;
