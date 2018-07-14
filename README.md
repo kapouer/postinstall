@@ -145,3 +145,20 @@ Supported commands:
 - zero-config compilers/minifiers: js, css (postinstall-js, postinstall-css)
 - browserify (postinstall-browserify)
 
+
+Using as a module
+-----------------
+
+`opts` accepts the same options as the cli options.
+
+```
+var postinstall = require('postinstall');
+postinstall.process(config, {
+  allow: ['copy']
+}).then(function() {
+  // done
+}).catch(function(err) {
+  console.error(err);
+});
+```
+
