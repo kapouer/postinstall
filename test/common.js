@@ -17,8 +17,10 @@ exports.checkFiles = function(dir, list) {
 };
 
 exports.check = function(dir, pkg, opts) {
-	var commands = postinstall.prepare(pkg.postinstall || {}, opts || {});
+	if (!opts) opts = {};
+	var commands = postinstall.prepare(pkg.postinstall || {}, opts);
 	var countCommands = 0;
+	var cwd = opts.cwd || process.cwd();
 	return Promise.all(commands.map(function(obj) {
 		if (!obj) {
 			return;
@@ -26,7 +28,7 @@ exports.check = function(dir, pkg, opts) {
 		if (obj.output.indexOf('*') >= 0) {
 			return;
 		}
-		var dest = Path.join(dir, obj.output);
+		var dest = Path.resolve(cwd, Path.join(dir, obj.output));
 		var count = 0;
 		return Promise.resolve().then(function() {
 			if (obj.input.endsWith('*')) return glob(Path.join(dest, '*'), {
