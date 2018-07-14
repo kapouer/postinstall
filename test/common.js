@@ -84,6 +84,7 @@ function run(dir, cmd) {
 			npm_config_audit: 'false'
 		}
 	}).then(function(out) {
+		console.info(out);
 		return fs.readFile(Path.join(dir, 'package.json')).then(function(buf) {
 			return {dir: dir, pkg: JSON.parse(buf)};
 		});
