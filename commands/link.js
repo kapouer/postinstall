@@ -1,4 +1,5 @@
 var fs = require("fs-extra");
+var Path = require('path');
 
 module.exports = function(inputs, output) {
 	if (inputs.length > 1) {
@@ -12,7 +13,7 @@ module.exports = function(inputs, output) {
 			if (stats && stats.isSymbolicLink()) return fs.unlink(output);
 		});
 	}).then(function() {
-		return fs.symlink(input, output);
+		return fs.symlink(Path.relative(Path.dirname(output), input), output);
 	});
 };
 
