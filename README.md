@@ -1,7 +1,8 @@
 postinstall
 ===========
 
-Transform files of Node.js modules after installation.
+Transform files of Node.js modules with simple and powerful package.json configurations
+
 
 How
 ---
@@ -19,10 +20,24 @@ Declare postinstall script in package.json:
     "postinstall": "*"
   },
   "scripts": {
-    "postinstall": "postinstall"
+    "postinstall": "postinstall",
+    "prepare": "postinstall"
+  },
+  "prepare": {
+    "<modulename>/path": "browserify lib/"
+  },
+  "postinstall": {
+    "<othermodule>/file": "link lib/"
   }
 }
 ```
+
+Since version 0.5.0, choose whichever lifecycle event is needed:
+
+- `prepare` is meant to be used by the package maintainer, and
+- `postinstall` is triggered for all clients.
+
+Choose wisely...
 
 From there, more dependencies and commands can be added:
 
