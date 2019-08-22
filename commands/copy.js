@@ -5,6 +5,9 @@ module.exports = function(inputs, output) {
 		throw new Error("Cannot copy more than one file at once to " + output);
 	}
 	var input = inputs[0];
-	return fs.copy(input, output);
+	return fs.copy(input, output, {
+		dereference: true,
+		overwrite: true
+	});
 };
 
