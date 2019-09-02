@@ -37,7 +37,9 @@ Since version 0.5.0, choose whichever lifecycle event is needed:
 - `prepare` is meant to be used by the package maintainer, and
 - `postinstall` is triggered for all clients.
 
-Choose wisely...
+Choose wisely... as a rule of thumb, i advise to use:
+- `prepare` with copy, concat, browserify, js, css commands
+- `postinstall` with link command, which is useful to avoid big tarballs
 
 From there, more dependencies and commands can be added:
 
