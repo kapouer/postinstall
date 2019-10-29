@@ -20,6 +20,8 @@ delete opts._;
 
 fs.readJson(configFile).then(function(obj) {
 	return postinstall.process(obj[process.env.npm_lifecycle_event] || {}, opts);
+}).then(function() {
+	process.exit(0);
 }).catch(function(err) {
 	console.error(err);
 	process.exit(1);
