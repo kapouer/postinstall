@@ -1,7 +1,7 @@
-var fs = require("fs");
+const fs = require("fs");
 
 module.exports = function(inputs, output, options) {
-	var to = fs.createWriteStream(output, {flags: 'a'});
+	const to = fs.createWriteStream(output, {flags: 'a'});
 	inputs = inputs.slice();
 	return new Promise(function(resolve, reject) {
 		write(inputs, to, resolve, reject);
@@ -10,7 +10,7 @@ module.exports = function(inputs, output, options) {
 
 function write(files, to, resolve, reject) {
 	if (files.length) {
-		var readStream = fs.createReadStream(files.shift());
+		const readStream = fs.createReadStream(files.shift());
 		readStream.pipe(to, {
 			end: false
 		});

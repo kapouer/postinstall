@@ -10,7 +10,7 @@
   "postinstall": {
     "./src.js": "link dst.js",
     "./src/other.js": "copy dest/file.js",
-    "./src/*": "copy dest/rec/",
+    "./src/**": "copy dest/rec/",
     "./lib/*.css": "link dest/*.min.css",
     "./lib/": {
       "command": "concat",

@@ -1,6 +1,6 @@
 var pify = require('util').promisify;
 var fs = require('fs-extra');
-var spawn = require('spawn-please');
+var exec = pify(require('child_process').exec);
 var Path = require('path');
 var glob = pify(require('glob'));
 var assert = require('assert');
@@ -70,7 +70,7 @@ exports.cmd = function(dir, cmd) {
 
 function run(dir, cmd) {
 	if (!Array.isArray(cmd)) cmd = [cmd];
-	return spawn("npm", cmd, {
+	return exec("npm " + cmd, {
 		cwd: dir,
 		timeout: 10000,
 		env: {
@@ -86,7 +86,8 @@ function run(dir, cmd) {
 			npm_config_audit: 'false'
 		}
 	}).then(function(out) {
-		console.info(out);
+		if (out.stderr) console.error(out.stderr);
+		if (out.stdout) console.error(out.stdout);
 		return fs.readFile(Path.join(dir, 'package.json')).then(function(buf) {
 			return {dir: dir, pkg: JSON.parse(buf)};
 		});

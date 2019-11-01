@@ -1,16 +1,16 @@
-var pify = require('util').promisify;
-var glob = pify(require('glob'));
-var fs = require('fs').promises;
-var resolveFrom = require('resolve-from');
-var resolvePkg = require('resolve-pkg');
-var Path = require('path');
-var minimist = require('minimist');
+const pify = require('util').promisify;
+const glob = pify(require('glob'));
+const fs = require('fs').promises;
+const resolveFrom = require('resolve-from');
+const resolvePkg = require('resolve-pkg');
+const Path = require('path');
+const minimist = require('minimist');
 
 exports.prepare = function(obj, globalOpts) {
-	var list = [];
+	let list = [];
 	Object.keys(obj).forEach(function(key) {
-		var line = obj[key];
-		var command, output, opts;
+		const line = obj[key];
+		let command, output, opts;
 		if (Array.isArray(line)) {
 			line.forEach(function(item) {
 				list = list.concat(exports.prepare({[key]: item}, globalOpts));
@@ -24,7 +24,7 @@ exports.prepare = function(obj, globalOpts) {
 			delete opts.command;
 			delete opts.output;
 		} else {
-			var args = minimist(line.split(' '));
+			const args = minimist(line.split(' '));
 			if (args._.length == 2) {
 				command = args._[0];
 				output = args._[1];
@@ -55,7 +55,7 @@ exports.prepare = function(obj, globalOpts) {
 
 exports.process = function(config, opts) {
 	if (!opts) opts = {};
-	var commands = exports.prepare(config, opts);
+	const commands = exports.prepare(config, opts);
 	return Promise.all(commands.map(function(obj) {
 		if (!obj) return;
 		return Promise.resolve().then(function() {
@@ -68,20 +68,20 @@ function processCommand(obj, opts) {
 	if (!opts.cwd) opts.cwd = process.cwd();
 	else opts.cwd = Path.resolve(opts.cwd);
 
-	var srcPath = resolvePkg(obj.input, {
+	let srcPath = resolvePkg(obj.input, {
 		cwd: opts.cwd
 	});
 	if (!srcPath) srcPath = Path.resolve(opts.cwd, obj.input);
 	var srcFile = Path.basename(srcPath);
 
-	var commandFn;
+	let commandFn;
 	if (obj.command == "link" || obj.command == "copy" || obj.command == "concat") {
 		commandFn = require(`./commands/${obj.command}`);
 	} else {
 		commandFn = require(resolveFrom(opts.cwd, `postinstall-${obj.command}`));
 	}
 
-	var destDir, destFile;
+	let destDir, destFile;
 	if (obj.output.endsWith('/')) {
 		destDir = obj.output;
 	} else {
@@ -89,8 +89,8 @@ function processCommand(obj, opts) {
 		destFile = Path.basename(obj.output);
 	}
 
-	var star = srcFile.indexOf('*') >= 0;
-	var bundle = star && destFile && destFile.indexOf('*') < 0;
+	const star = srcFile.indexOf('*') >= 0;
+	const bundle = star && destFile && destFile.indexOf('*') < 0;
 
 	destDir = Path.resolve(opts.cwd, destDir);
 	assertRooted(opts.cwd, destDir);
@@ -99,11 +99,10 @@ function processCommand(obj, opts) {
 		return glob(srcPath, {
 			nosort: true,
 			nobrace: true,
-			noglobstar: true,
 			noext: true
 		}).then(function(paths) {
 			if (paths.length == 0) throw new Error("No files found at " + srcPath);
-			var list = paths;
+			let list = paths;
 			if (paths.length == 1 && obj.options.list) {
 				list = obj.options.list.map(function(path) {
 					return Path.join(paths[0], path);
@@ -111,15 +110,15 @@ function processCommand(obj, opts) {
 			}
 			if (bundle || obj.options.list) return commandFn(list, obj.output, obj.options);
 			return Promise.all(paths.map(function(input) {
-				var outputFile;
+				let outputFile;
 				if (star) {
-					var inputFile = Path.basename(input);
+					const inputFile = Path.basename(input);
 					if (!destFile) {
 						outputFile = inputFile;
 					} else { // bundle == false
 						// replace * in destFile by the match in input basename
-						var reg = new RegExp(srcFile.replace('*', '(\\w+)'));
-						var part = reg.exec(inputFile)[1];
+						const reg = new RegExp(srcFile.replace('*', '(\\w+)'));
+						const part = reg.exec(inputFile)[1];
 						outputFile = destFile.replace('*', part);
 					}
 				} else {
