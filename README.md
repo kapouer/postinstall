@@ -106,6 +106,12 @@ postinstall: {
 }
 ```
 
+### Array form
+```
+	"<module>/<input>": [<shortForm | longForm>, ...]
+```
+
+
 input can be a path, with an optional star in its filename.
 
 output can be a path, with an optional star in its filename.

@@ -1,15 +1,22 @@
 var pify = require('util').promisify;
 var glob = pify(require('glob'));
-var fs = require('fs-extra');
+var fs = require('fs').promises;
 var resolveFrom = require('resolve-from');
 var resolvePkg = require('resolve-pkg');
 var Path = require('path');
 var minimist = require('minimist');
 
 exports.prepare = function(obj, globalOpts) {
-	return Object.keys(obj).map(function(key) {
+	var list = [];
+	Object.keys(obj).forEach(function(key) {
 		var line = obj[key];
 		var command, output, opts;
+		if (Array.isArray(line)) {
+			line.forEach(function(item) {
+				list = list.concat(exports.prepare({[key]: item}, globalOpts));
+			});
+			return;
+		}
 		if (typeof line == "object") {
 			opts = Object.assign({}, line);
 			command = line.command;
@@ -36,13 +43,14 @@ exports.prepare = function(obj, globalOpts) {
 				return;
 			}
 		}
-		return {
+		list.push({
 			command: command,
 			output: output,
 			input: key,
 			options: opts
-		};
+		});
 	});
+	return list;
 };
 
 exports.process = function(config, opts) {
@@ -87,7 +95,7 @@ function processCommand(obj, opts) {
 	destDir = Path.resolve(opts.cwd, destDir);
 	assertRooted(opts.cwd, destDir);
 
-	return fs.ensureDir(destDir).then(function() {
+	return fs.mkdir(destDir, {recursive:true}).then(function() {
 		return glob(srcPath, {
 			nosort: true,
 			nobrace: true,

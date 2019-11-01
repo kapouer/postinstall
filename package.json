@@ -25,11 +25,10 @@
   },
   "homepage": "https://github.com/kapouer/postinstall#readme",
   "dependencies": {
-    "fs-extra": ">=5",
     "glob": ">=7",
     "minimist": "^1.2.0",
-    "resolve-from": ">=4",
-    "resolve-pkg": ">=1"
+    "resolve-from": ">=5",
+    "resolve-pkg": ">=2"
   },
   "devDependencies": {
     "mocha": ">=5",

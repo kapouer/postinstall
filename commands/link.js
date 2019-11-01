@@ -1,4 +1,4 @@
-var fs = require("fs-extra");
+var fs = require("fs").promises;
 var Path = require('path');
 
 module.exports = function(inputs, output) {
