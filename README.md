@@ -1,7 +1,13 @@
 postinstall
 ===========
 
-Transform files of Node.js modules with simple and powerful package.json configurations
+Transform files of Node.js modules with simple and powerful package.json configurations.
+Meant to be used by packages lifecycle events:
+
+- `prepare`  
+  use it to transform devDependencies, while developing or before publishing
+- `postinstall`  
+  use it to deploy dependencies.
 
 
 How
@@ -10,7 +16,7 @@ How
 Depend on this package:
 `npm install postinstall --save`
 
-Declare postinstall script in package.json:
+Configure and run postinstall in package.json:
 
 ```
 {
@@ -31,15 +37,6 @@ Declare postinstall script in package.json:
   }
 }
 ```
-
-Since version 0.5.0, choose whichever lifecycle event is needed:
-
-- `prepare` is meant to be used by the package maintainer, and
-- `postinstall` is triggered for all clients.
-
-Choose wisely... as a rule of thumb, i advise to use:
-- `prepare` with copy, concat, browserify, js, css commands
-- `postinstall` with link command, which is useful to avoid big tarballs
 
 From there, more dependencies and commands can be added:
 
