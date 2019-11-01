@@ -1,6 +1,6 @@
 {
   "name": "postinstall",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Deploy files from modules after npm install",
   "main": "index.js",
   "scripts": {
