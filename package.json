@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/kapouer/postinstall#readme",
   "dependencies": {
+    "@danieldietrich/copy": "^0.2.1",
     "glob": ">=7",
     "minimist": "^1.2.0",
     "resolve-from": ">=5",
