@@ -70,7 +70,7 @@ exports.cmd = function(dir, cmd) {
 
 function run(dir, cmd) {
 	if (!Array.isArray(cmd)) cmd = [cmd];
-	return exec("npm " + cmd, {
+	return exec("npm " + cmd.join(' '), {
 		cwd: dir,
 		timeout: 10000,
 		env: {
