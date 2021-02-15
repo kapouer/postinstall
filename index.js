@@ -116,8 +116,8 @@ function processCommand(obj, opts) {
 					if (!destFile) {
 						outputFile = inputFile;
 					} else { // bundle == false
-						// replace * in destFile by the match in input basename
-						const reg = new RegExp(srcFile.replace('*', '(\\w+)'));
+						const regEnd = srcFile.endsWith('*') ? '(.+)$' : '([^\\.]+)';
+						const reg = new RegExp(srcFile.replace('*', regEnd));
 						const part = reg.exec(inputFile)[1];
 						outputFile = destFile.replace('*', part);
 					}
