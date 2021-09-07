@@ -5,7 +5,8 @@
     "postinstall": "postinstall"
   },
   "postinstall": {
-    "sample/dist/test.js": "link test.js"
+    "sample/dist/test.js": "link test.js",
+    "sample": "copy sample.js"
   },
   "dependencies": {
     "postinstall": "../../../",

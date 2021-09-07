@@ -68,9 +68,14 @@ function command(cmd, input, output, options = {}, opts = {}) {
 	if (!opts.cwd) opts.cwd = process.cwd();
 	else opts.cwd = Path.resolve(opts.cwd);
 
-	let srcPath = resolvePkg(input, {
-		cwd: opts.cwd
-	});
+	let srcPath;
+	if (input.includes('/')) {
+		srcPath = resolvePkg(input, {
+			cwd: opts.cwd
+		});
+	} else {
+		srcPath = resolveFrom(opts.cwd, input);
+	}
 	if (!srcPath) srcPath = Path.resolve(opts.cwd, input);
 	const srcFile = Path.basename(srcPath);
 
