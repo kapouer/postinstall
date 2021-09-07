@@ -69,12 +69,13 @@ function command(cmd, input, output, options = {}, opts = {}) {
 	else opts.cwd = Path.resolve(opts.cwd);
 
 	let srcPath;
-	if (input.includes('/')) {
+	const numComps = input.split('/').length;
+	if (input.startsWith('@') && numComps <= 2 || numComps == 1) {
+		srcPath = resolveFrom(opts.cwd, input);
+	} else {
 		srcPath = resolvePkg(input, {
 			cwd: opts.cwd
 		});
-	} else {
-		srcPath = resolveFrom(opts.cwd, input);
 	}
 	if (!srcPath) srcPath = Path.resolve(opts.cwd, input);
 	const srcFile = Path.basename(srcPath);
