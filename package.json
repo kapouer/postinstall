@@ -34,5 +34,30 @@
   "devDependencies": {
     "fs-extra": "^9.1.0",
     "mocha": ">=8.3.0"
+    "@kapouer/eslint-config": "^1.5.1",
+  },
+  "eslintConfig": {
+    "extends": "@kapouer/eslint-config",
+    "ignorePatterns": [
+      "test/fixtures/**"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "index.js"
+        ],
+        "env": {
+          "es6": true
+        }
+      },
+      {
+        "files": [
+          "test/*.js"
+        ],
+        "env": {
+          "mocha": true
+        }
+      }
+    ]
   }
 }
