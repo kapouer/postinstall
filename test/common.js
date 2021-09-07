@@ -1,12 +1,12 @@
-var pify = require('util').promisify;
-var fs = require('fs-extra');
-var exec = pify(require('child_process').exec);
-var Path = require('path');
-var glob = pify(require('glob'));
-var assert = require('assert');
-var postinstall = require('../');
+const pify = require('util').promisify;
+const fs = require('fs-extra');
+const exec = pify(require('child_process').exec);
+const Path = require('path');
+const glob = pify(require('glob'));
+const assert = require('assert');
+const postinstall = require('../');
 
-var tmpDir = Path.join(__dirname, "tmp");
+const tmpDir = Path.join(__dirname, "tmp");
 
 exports.checkFiles = function(dir, list) {
 	return Promise.all(list.map(function(test) {
@@ -18,9 +18,9 @@ exports.checkFiles = function(dir, list) {
 
 exports.check = function(dir, pkg, opts) {
 	if (!opts) opts = {};
-	var commands = postinstall.prepare(pkg.postinstall || {}, opts);
-	var countCommands = 0;
-	var cwd = opts.cwd || process.cwd();
+	const commands = postinstall.prepare(pkg.postinstall || {}, opts);
+	let countCommands = 0;
+	const cwd = opts.cwd || process.cwd();
 	return Promise.all(commands.map(function(obj) {
 		if (!obj) {
 			return;
@@ -28,20 +28,20 @@ exports.check = function(dir, pkg, opts) {
 		if (obj.output.indexOf('*') >= 0) {
 			return;
 		}
-		var dest = Path.resolve(cwd, Path.join(dir, obj.output));
-		var count = 0;
+		const dest = Path.resolve(cwd, Path.join(dir, obj.output));
+		let count = 0;
 		return Promise.resolve().then(function() {
 			if (obj.input.endsWith('*')) return glob(Path.join(dest, '*'), {
 				nosort: true,
 				nobrace: true,
 				noglobstar: true,
 			});
-			else return [dest]
+			else return [dest];
 		}).then(function(files) {
 			return Promise.all(files.map(function(file) {
 				return fs.lstat(file).then(function(stat) {
 					count++;
-					if (obj.command == "link") {
+					if (obj.cmd == "link") {
 						assert.ok(stat.isSymbolicLink(), `is symbolic link ${file}`);
 					}
 				}).catch(function(err) {

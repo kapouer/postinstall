@@ -1,10 +1,9 @@
 const fs = require("fs");
 
-module.exports = function(inputs, output, options) {
+module.exports = function (inputs, output, options) {
 	const to = fs.createWriteStream(output, {flags: 'a'});
-	inputs = inputs.slice();
-	return new Promise(function(resolve, reject) {
-		write(inputs, to, resolve, reject);
+	return new Promise(function (resolve, reject) {
+		write(inputs.slice(), to, resolve, reject);
 	});
 };
 
@@ -14,7 +13,7 @@ function write(files, to, resolve, reject) {
 		readStream.pipe(to, {
 			end: false
 		});
-		readStream.on('error', reject)
+		readStream.on('error', reject);
 		readStream.on('end', function() {
 			write(files, to, resolve, reject);
 		});

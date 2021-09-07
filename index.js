@@ -6,127 +6,136 @@ const resolvePkg = require('resolve-pkg');
 const Path = require('path');
 const minimist = require('minimist');
 
-exports.prepare = function(obj, globalOpts) {
+Object.assign(exports, {
+	prepare, command,
+	process(config, opts) {
+		if (!opts) opts = {};
+		const list = prepare(config, opts);
+		return Promise.all(list.map(function ({ command: cmd, input, output, options }) {
+			return command(cmd, input, output, options, opts);
+		}));
+	}
+});
+
+function prepare(obj, globalOpts) {
 	let list = [];
-	Object.keys(obj).forEach(function(key) {
-		const line = obj[key];
-		let command, output, opts;
+	Object.keys(obj).forEach(function(input) {
+		const line = obj[input];
+		let cmd, output, opts;
 		if (Array.isArray(line)) {
 			line.forEach(function(item) {
-				list = list.concat(exports.prepare({[key]: item}, globalOpts));
+				list = list.concat(prepare({[input]: item}, globalOpts));
 			});
 			return;
 		}
 		if (typeof line == "object") {
 			opts = Object.assign({}, line);
-			command = line.command;
+			cmd = line.command;
 			output = line.output;
 			delete opts.command;
 			delete opts.output;
 		} else {
 			const args = minimist(line.split(' '));
 			if (args._.length == 2) {
-				command = args._[0];
+				cmd = args._[0];
 				output = args._[1];
 			}
 			delete args._;
 			opts = args;
 		}
-		if (!command || !output) {
+		if (!cmd || !output) {
 			console.error("Cannot parse postinstall command", line);
 			return;
 		}
 
 		if (globalOpts.allow) {
-			if (!globalOpts.allow.includes(command)) {
-				console.error("Unauthorized postinstall command", command);
+			if (!globalOpts.allow.includes(cmd)) {
+				console.error("Unauthorized postinstall command", cmd);
 				return;
 			}
 		}
 		list.push({
-			command: command,
-			output: output,
-			input: key,
+			command: cmd,
+			input,
+			output,
 			options: opts
 		});
 	});
 	return list;
-};
+}
 
-exports.process = function(config, opts) {
-	if (!opts) opts = {};
-	const commands = exports.prepare(config, opts);
-	return Promise.all(commands.map(function(obj) {
-		if (!obj) return;
-		return Promise.resolve().then(function() {
-			return processCommand(obj, opts);
-		});
-	}));
-};
-
-function processCommand(obj, opts) {
+function command(cmd, input, output, options = {}, opts = {}) {
 	if (!opts.cwd) opts.cwd = process.cwd();
 	else opts.cwd = Path.resolve(opts.cwd);
 
-	let srcPath = resolvePkg(obj.input, {
+	let srcPath = resolvePkg(input, {
 		cwd: opts.cwd
 	});
-	if (!srcPath) srcPath = Path.resolve(opts.cwd, obj.input);
-	var srcFile = Path.basename(srcPath);
+	if (!srcPath) srcPath = Path.resolve(opts.cwd, input);
+	const srcFile = Path.basename(srcPath);
 
-	let commandFn;
-	if (obj.command == "link" || obj.command == "copy" || obj.command == "concat") {
-		commandFn = require(`./commands/${obj.command}`);
+	let cmdFn;
+	if (cmd == "link" || cmd == "copy" || cmd == "concat") {
+		cmdFn = require(`./commands/${cmd}`);
 	} else {
-		commandFn = require(resolveFrom(opts.cwd, `postinstall-${obj.command}`));
+		cmdFn = require(resolveFrom(opts.cwd, `postinstall-${cmd}`));
 	}
 
 	let destDir, destFile;
-	if (obj.output.endsWith('/')) {
-		destDir = obj.output;
+	if (output.endsWith('/')) {
+		destDir = output;
 	} else {
-		destDir = Path.dirname(obj.output);
-		destFile = Path.basename(obj.output);
+		destDir = Path.dirname(output);
+		destFile = Path.basename(output);
 	}
 
 	const star = srcFile.indexOf('*') >= 0;
+	const globstar = srcFile.indexOf('**') >= 0;
 	const bundle = star && destFile && destFile.indexOf('*') < 0;
 
 	destDir = Path.resolve(opts.cwd, destDir);
 	assertRooted(opts.cwd, destDir);
 
-	return fs.mkdir(destDir, {recursive:true}).then(function() {
+	return fs.mkdir(destDir, { recursive: true }).then(function () {
 		return glob(srcPath, {
 			nosort: true,
 			nobrace: true,
-			noext: true
-		}).then(function(paths) {
-			if (paths.length == 0) throw new Error("No files found at " + srcPath);
-			let list = paths;
-			if (paths.length == 1 && obj.options.list) {
-				list = obj.options.list.map(function(path) {
-					return Path.join(paths[0], path);
-				});
-			}
-			if (bundle || obj.options.list) return commandFn(list, obj.output, obj.options);
-			return Promise.all(paths.map(function(input) {
-				let outputFile;
-				if (star) {
-					const inputFile = Path.basename(input);
-					if (!destFile) {
-						outputFile = inputFile;
-					} else { // bundle == false
-						const regEnd = srcFile.endsWith('*') ? '(.+)$' : '([^\\.]+)';
-						const reg = new RegExp(srcFile.replace('*', regEnd));
-						const part = reg.exec(inputFile)[1];
-						outputFile = destFile.replace('*', part);
-					}
-				} else {
-					outputFile = destFile || srcFile;
-				}
-				return commandFn([input], Path.join(destDir, outputFile), obj.options);
-			}));
+			noext: true,
+			nodir: true
 		});
+	}).then(function (paths) {
+		let list = paths;
+		if (paths.length == 0 && options.list) {
+			list = options.list.map(function (path) {
+				return Path.join(srcPath, path);
+			});
+		}
+		if (bundle || options.list) return cmdFn(list, output, options);
+		if (paths.length == 0) throw new Error(`${cmd} ${output} but no files found at ${srcPath}`);
+		return Promise.all(paths.map(function (input) {
+			let curDestDir = destDir;
+			let outputFile;
+			if (globstar) {
+				const srcRoot = srcPath.split('**')[0];
+				curDestDir = Path.join(destDir, Path.dirname(input.substring(srcRoot.length)));
+				outputFile = Path.basename(input);
+			} else if (star) {
+				const inputFile = Path.basename(input);
+				if (!destFile) {
+					outputFile = inputFile;
+				} else { // bundle == false
+					const regEnd = srcFile.endsWith('*') ? '(.+)$' : '([^\\.]+)';
+					const reg = new RegExp(srcFile.replace(/\*{1,2}/, regEnd));
+					const part = reg.exec(inputFile)[1];
+					outputFile = destFile.replace('*', part);
+				}
+			} else {
+				outputFile = destFile || srcFile;
+			}
+			return fs.mkdir(curDestDir, { recursive: true }).then(function () {
+				return cmdFn([input], Path.join(curDestDir, outputFile), options);
+			});
+		}));
 	});
 }
 
@@ -135,4 +144,3 @@ function assertRooted(root, path) {
 		throw new Error(`path is not in root:\n ${root}\n ${path}`);
 	}
 }
-

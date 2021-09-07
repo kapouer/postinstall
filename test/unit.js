@@ -1,5 +1,5 @@
-var common = require('./common');
-var assert = require('assert');
+const common = require('./common');
+const assert = require('assert');
 
 describe("Unit tests", function suite() {
 	this.timeout(10000);
@@ -66,7 +66,7 @@ describe("Unit tests", function suite() {
 	});
 
 	it("should throw when nothing matches", function() {
-		var err = null;
+		let err = null;
 		return common.cmd("throw", "install").catch(function(ex) {
 			err = ex;
 		}).then(function(what) {
@@ -84,7 +84,7 @@ describe("Unit tests", function suite() {
 
 	it("should run postinstall module with cwd set properly", function() {
 		return common.cmd("ignore-scripts", ["install", "--ignore-scripts"]).then(function({dir, pkg}) {
-			var cwd = './test/tmp/ignore-scripts';
+			const cwd = './test/tmp/ignore-scripts';
 			return require('../').process(require('./tmp/ignore-scripts/package.json').postinstall, {
 				cwd: cwd
 			}).then(function() {
