@@ -98,6 +98,7 @@ function command(cmd, input, output, options = {}, opts = {}) {
 	const star = srcFile.indexOf('*') >= 0;
 	const globstar = srcFile.indexOf('**') >= 0;
 	const bundle = star && destFile && destFile.indexOf('*') < 0;
+	const nodir = star || globstar;
 
 	destDir = Path.resolve(opts.cwd, destDir);
 	assertRooted(opts.cwd, destDir);
@@ -107,17 +108,24 @@ function command(cmd, input, output, options = {}, opts = {}) {
 			nosort: true,
 			nobrace: true,
 			noext: true,
-			nodir: true
+			nodir: nodir
 		});
 	}).then(function (paths) {
 		let list = paths;
-		if (paths.length == 0 && options.list) {
-			list = options.list.map(function (path) {
-				return Path.join(srcPath, path);
-			});
+		if (options.list) {
+			if (!nodir && paths.length <= 1) paths.shift();
+			if (paths.length == 0) {
+				list = options.list.map(function (path) {
+					return Path.join(srcPath, path);
+				});
+			}
 		}
-		if (bundle || options.list) return cmdFn(list, output, options);
-		if (paths.length == 0) throw new Error(`${cmd} ${output} but no files found at ${srcPath}`);
+		if (bundle || options.list) {
+			return cmdFn(list, output, options);
+		}
+		if (paths.length == 0) {
+			throw new Error(`${cmd} ${output} but no files found at ${srcPath}`);
+		}
 		return Promise.all(paths.map(function (input) {
 			let curDestDir = destDir;
 			let outputFile;
