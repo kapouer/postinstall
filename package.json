@@ -36,6 +36,9 @@
     "fs-extra": "^10.0.0",
     "mocha": ">=9.1.1"
   },
+  "mocha": {
+    "spec": "test/unit.js"
+  },
   "eslintConfig": {
     "extends": "@kapouer/eslint-config",
     "ignorePatterns": [
