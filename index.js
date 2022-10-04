@@ -11,7 +11,7 @@ Object.assign(exports, {
 	process(config, opts) {
 		if (!opts) opts = {};
 		const list = prepare(config, opts);
-		return Promise.all(list.map(function ({ command: cmd, input, output, options }) {
+		return Promise.all(list.map(({ command: cmd, input, output, options }) => {
 			return command(cmd, input, output, options, opts);
 		}));
 	}
@@ -19,11 +19,11 @@ Object.assign(exports, {
 
 function prepare(obj, globalOpts) {
 	let list = [];
-	Object.keys(obj).forEach(function(input) {
+	Object.keys(obj).forEach((input) => {
 		const line = obj[input];
 		let cmd, output, opts;
 		if (Array.isArray(line)) {
-			line.forEach(function(item) {
+			line.forEach((item) => {
 				list = list.concat(prepare({[input]: item}, globalOpts));
 			});
 			return;
@@ -110,19 +110,19 @@ function command(cmd, input, output, options = {}, opts = {}) {
 	destDir = Path.resolve(opts.cwd, destDir);
 	assertRooted(opts.cwd, destDir);
 
-	return fs.mkdir(destDir, { recursive: true }).then(function () {
+	return fs.mkdir(destDir, { recursive: true }).then(() => {
 		return glob(srcPath, {
 			nosort: true,
 			nobrace: true,
 			noext: true,
 			nodir: nodir
 		});
-	}).then(function (paths) {
+	}).then((paths) => {
 		let list = paths;
 		if (options.list) {
 			if (!nodir && paths.length <= 1) paths.shift();
 			if (paths.length == 0) {
-				list = options.list.map(function (path) {
+				list = options.list.map((path) => {
 					return Path.join(srcPath, path);
 				});
 			}
@@ -133,7 +133,7 @@ function command(cmd, input, output, options = {}, opts = {}) {
 		if (paths.length == 0) {
 			throw new Error(`${cmd} ${output} but no files found at ${srcPath}`);
 		}
-		return Promise.all(paths.map(function (input) {
+		return Promise.all(paths.map((input) => {
 			let curDestDir = destDir;
 			let outputFile;
 			if (globstar) {
@@ -153,7 +153,7 @@ function command(cmd, input, output, options = {}, opts = {}) {
 			} else {
 				outputFile = destFile || srcFile;
 			}
-			return fs.mkdir(curDestDir, { recursive: true }).then(function () {
+			return fs.mkdir(curDestDir, { recursive: true }).then(() => {
 				return cmdFn([input], Path.join(curDestDir, outputFile), options);
 			});
 		}));
