@@ -77,6 +77,13 @@ function command(cmd, input, output, options = {}, opts = {}) {
 			cwd: opts.cwd
 		});
 	}
+	if (!srcPath) try {
+		srcPath = require.resolve(input, {
+			paths: [opts.cwd]
+		});
+	} catch (err) {
+		// ignore
+	}
 	if (!srcPath) srcPath = Path.resolve(opts.cwd, input);
 	const srcFile = Path.basename(srcPath);
 
