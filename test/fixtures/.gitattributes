@@ -1,0 +1,2 @@
+# Ensure fixture files have LF and not CRLF line endings
+* text=auto eol=lf

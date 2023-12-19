@@ -17,6 +17,10 @@ Object.assign(exports, {
 	}
 });
 
+// ensure a path is using forward slashes
+function slash(path) {
+	return path.split(Path.sep).join('/')
+}
 function prepare(obj, globalOpts) {
 	let list = [];
 	Object.keys(obj).forEach((input) => {
@@ -111,7 +115,7 @@ function command(cmd, input, output, options = {}, opts = {}) {
 	assertRooted(opts.cwd, destDir);
 
 	return fs.mkdir(destDir, { recursive: true }).then(() => {
-		return glob(srcPath, {
+		return glob(slash(srcPath), {
 			nosort: true,
 			nobrace: true,
 			noext: true,
