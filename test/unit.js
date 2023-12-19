@@ -3,17 +3,17 @@ const assert = require('assert');
 
 describe("Unit tests", function suite() {
 	this.timeout(10000);
-	before(function() {
+	before(() => {
 		return common.prepare();
 	});
 
-	after(function() {
+	after(() => {
 
 	});
 
-	it("should install local file link and copy", function() {
-		return common.cmd("local-file", "install").then(function({dir, pkg}) {
-			return common.check(dir, pkg).then(function() {
+	it("should install local file link and copy", () => {
+		return common.cmd("local-file", "install").then(({dir, pkg}) => {
+			return common.check(dir, pkg).then(() => {
 				return common.checkFiles(dir, [{
 					path: 'dest/bundle.js',
 					data: "// one\n// two\n"
@@ -37,58 +37,58 @@ describe("Unit tests", function suite() {
 		});
 	});
 
-	it("should install dependency file link", function() {
-		return common.cmd("dep-file", "install").then(function({dir, pkg}) {
+	it("should install dependency file link", () => {
+		return common.cmd("dep-file", "install").then(({dir, pkg}) => {
 			return common.check(dir, pkg);
 		});
 	});
 
-	it("should install scoped dependency file link", function() {
-		return common.cmd("scoped-dep-file", "install").then(function({dir, pkg}) {
+	it("should install scoped dependency file link", () => {
+		return common.cmd("scoped-dep-file", "install").then(({dir, pkg}) => {
 			return common.check(dir, pkg);
 		});
 	});
 
-	it("should install dependency wildcard link", function() {
-		return common.cmd("dep-wildcard", "install").then(function({dir, pkg}) {
+	it("should install dependency wildcard link", () => {
+		return common.cmd("dep-wildcard", "install").then(({dir, pkg}) => {
 			return common.check(dir, pkg);
 		});
 	});
 
-	it("should install dependency file installed within dependency", function() {
-		return common.cmd("dep-dep-file", "install").then(function({dir, pkg}) {
+	it("should install dependency file installed within dependency", () => {
+		return common.cmd("dep-dep-file", "install").then(({dir, pkg}) => {
 			return common.check(dir, pkg);
-		}).then(function() {
-			return common.cmd("dep-dep-file", "update").then(function({dir, pkg}) {
+		}).then(() => {
+			return common.cmd("dep-dep-file", "update").then(({dir, pkg}) => {
 				return common.check(dir, pkg);
 			});
 		});
 	});
 
-	it("should throw when nothing matches", function() {
+	it("should throw when nothing matches", () => {
 		let err = null;
-		return common.cmd("throw", "install").catch(function(ex) {
+		return common.cmd("throw", "install").catch((ex) => {
 			err = ex;
-		}).then(function(what) {
+		}).then((what) => {
 			if (!err) throw new Error("Did not throw");
 		});
 	});
 
-	it("should not execute not whitelisted commands", function() {
-		return common.cmd("whitelist", "install").then(function({dir, pkg}) {
-			return common.check(dir, pkg, {allow: ['link']}).then(function(count) {
+	it("should not execute not whitelisted commands", () => {
+		return common.cmd("whitelist", "install").then(({dir, pkg}) => {
+			return common.check(dir, pkg, {allow: ['link']}).then((count) => {
 				assert.equal(1, count); // 1 because the star is not yet checked
 			});
 		});
 	});
 
-	it("should run postinstall module with cwd set properly", function() {
-		return common.cmd("ignore-scripts", ["install", "--ignore-scripts"]).then(function({dir, pkg}) {
+	it("should run postinstall module with cwd set properly", () => {
+		return common.cmd("ignore-scripts", ["install", "--ignore-scripts"]).then(({dir, pkg}) => {
 			const cwd = './test/tmp/ignore-scripts';
 			return require('../').process(require('./tmp/ignore-scripts/package.json').postinstall, {
 				cwd: cwd
-			}).then(function() {
-				return common.check(dir, pkg, {cwd: cwd}).then(function(count) {
+			}).then(() => {
+				return common.check(dir, pkg, {cwd: cwd}).then((count) => {
 					assert.equal(1, count);
 				});
 			});

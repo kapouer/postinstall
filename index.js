@@ -1,5 +1,4 @@
-const pify = require('util').promisify;
-const glob = pify(require('glob'));
+const { glob } = require('glob');
 const fs = require('fs').promises;
 const resolveFrom = require('resolve-from');
 const resolvePkg = require('resolve-pkg');
@@ -19,7 +18,7 @@ Object.assign(exports, {
 
 // ensure a path is using forward slashes
 function slash(path) {
-	return path.split(Path.sep).join('/')
+	return path.split(Path.sep).join('/');
 }
 function prepare(obj, globalOpts) {
 	let list = [];
@@ -116,13 +115,12 @@ function command(cmd, input, output, options = {}, opts = {}) {
 
 	return fs.mkdir(destDir, { recursive: true }).then(() => {
 		return glob(slash(srcPath), {
-			nosort: true,
 			nobrace: true,
 			noext: true,
 			nodir: nodir
 		});
 	}).then((paths) => {
-		let list = paths;
+		let list = paths.sort();
 		if (options.list) {
 			if (!nodir && paths.length <= 1) paths.shift();
 			if (paths.length == 0) {

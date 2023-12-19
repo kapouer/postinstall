@@ -26,15 +26,15 @@
   "homepage": "https://github.com/kapouer/postinstall#readme",
   "dependencies": {
     "@danieldietrich/copy": "^0.4.2",
-    "glob": "^8.0.3",
-    "minimist": "^1.2.6",
+    "glob": "^10.3.10",
+    "minimist": "^1.2.8",
     "resolve-from": "^5.0.0",
     "resolve-pkg": "^2.0.0"
   },
   "devDependencies": {
-    "@kapouer/eslint-config": "^1.8.0",
-    "fs-extra": "^10.1.0",
-    "mocha": ">=10.0.0"
+    "@kapouer/eslint-config": "^2.0.0",
+    "fs-extra": "^11.2.0",
+    "mocha": ">=10.2.0"
   },
   "mocha": {
     "spec": "test/unit.js"

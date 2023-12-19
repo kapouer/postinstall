@@ -2,15 +2,15 @@ const pify = require('util').promisify;
 const fs = require('fs-extra');
 const exec = pify(require('child_process').exec);
 const Path = require('path');
-const glob = pify(require('glob'));
+const { glob } = require('glob');
 const assert = require('assert');
 const postinstall = require('../');
 
 const tmpDir = Path.join(__dirname, "tmp");
 
 exports.checkFiles = function(dir, list) {
-	return Promise.all(list.map(function(test) {
-		return fs.readFile(Path.join(dir, test.path)).then(function(buf) {
+	return Promise.all(list.map((test) => {
+		return fs.readFile(Path.join(dir, test.path)).then((buf) => {
 			assert.equal(buf.toString(), test.data);
 		});
 	}));
@@ -21,7 +21,7 @@ exports.check = function(dir, pkg, opts) {
 	const commands = postinstall.prepare(pkg.postinstall || {}, opts);
 	let countCommands = 0;
 	const cwd = opts.cwd || process.cwd();
-	return Promise.all(commands.map(function(obj) {
+	return Promise.all(commands.map((obj) => {
 		if (!obj) {
 			return;
 		}
@@ -30,36 +30,36 @@ exports.check = function(dir, pkg, opts) {
 		}
 		const dest = Path.resolve(cwd, Path.join(dir, obj.output));
 		let count = 0;
-		return Promise.resolve().then(function() {
+		return Promise.resolve().then(() => {
 			if (obj.input.endsWith('*')) return glob(Path.join(dest, '*'), {
 				nosort: true,
 				nobrace: true,
 				noglobstar: true,
 			});
 			else return [dest];
-		}).then(function(files) {
-			return Promise.all(files.map(function(file) {
-				return fs.lstat(file).then(function(stat) {
+		}).then((files) => {
+			return Promise.all(files.map((file) => {
+				return fs.lstat(file).then((stat) => {
 					count++;
 					if (obj.cmd == "link") {
 						assert.ok(stat.isSymbolicLink(), `is symbolic link ${file}`);
 					}
-				}).catch(function(err) {
+				}).catch((err) => {
 					assert.ifError(err);
 				});
-			})).then(function() {
+			})).then(() => {
 				assert.ok(count == files.length, `${count} files should have been installed`);
 			});
-		}).then(function() {
+		}).then(() => {
 			countCommands++;
 		});
-	})).then(function() {
+	})).then(() => {
 		return countCommands;
 	});
 };
 
 exports.prepare = function() {
-	return fs.remove(tmpDir).then(function() {
+	return fs.remove(tmpDir).then(() => {
 		return fs.copy(Path.join(__dirname, "fixtures"), tmpDir);
 	});
 };
@@ -85,10 +85,10 @@ function run(dir, cmd) {
 			npm_config_offline: 'true',
 			npm_config_audit: 'false'
 		}
-	}).then(function(out) {
+	}).then((out) => {
 		if (out.stderr) console.error(out.stderr);
 		if (out.stdout) console.error(out.stdout);
-		return fs.readFile(Path.join(dir, 'package.json')).then(function(buf) {
+		return fs.readFile(Path.join(dir, 'package.json')).then((buf) => {
 			return {dir: dir, pkg: JSON.parse(buf)};
 		});
 	});
