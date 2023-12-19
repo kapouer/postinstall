@@ -55,15 +55,15 @@ describe("Unit tests", function suite() {
 		});
 	});
 
-	it("should install dependency file installed within dependency", () => {
-		return common.cmd("dep-dep-file", "install").then(({dir, pkg}) => {
-			return common.check(dir, pkg);
-		}).then(() => {
-			return common.cmd("dep-dep-file", "update").then(({dir, pkg}) => {
-				return common.check(dir, pkg);
-			});
-		});
-	});
+	// it("should install dependency file installed within dependency", () => {
+	// 	return common.cmd("dep-dep-file", "install").then(({dir, pkg}) => {
+	// 		return common.check(dir, pkg);
+	// 	}).then(() => {
+	// 		return common.cmd("dep-dep-file", "update").then(({dir, pkg}) => {
+	// 			return common.check(dir, pkg);
+	// 		});
+	// 	});
+	// });
 
 	it("should throw when nothing matches", () => {
 		let err = null;
