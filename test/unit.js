@@ -87,4 +87,10 @@ describe("Unit tests", function suite() {
 		assert.equal(1, count);
 	});
 
+	it("should access non-exported files from pure css module", async () => {
+		const { dir, pkg } = await common.cmd("getjustcss", "install");
+		const count = await common.check(dir, pkg);
+		assert.equal(1, count);
+	});
+
 });

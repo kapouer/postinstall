@@ -1,0 +1,14 @@
+{
+  "name": "getjustcss",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "postinstall"
+  },
+  "postinstall": {
+    "justcss/test.css": "link test.css"
+  },
+  "dependencies": {
+    "postinstall": "../../../",
+    "justcss": "file:../justcss"
+  }
+}

@@ -91,8 +91,16 @@ async function command(cmd, input, output, options = {}, opts = {}) {
 			basedir: opts.cwd
 		}));
 	} catch {
-		srcRoot = Path.resolve(opts.cwd, name); // local
+		// pass
 	}
+	if (!srcRoot) try {
+		srcRoot = findRoot(name,
+			require.resolve(name + '/package.json', { paths: [opts.cwd] })
+		);
+	} catch {
+		// pass
+	}
+	if (!srcRoot) srcRoot = Path.resolve(opts.cwd, name); // local
 	const srcPath = Path.join(srcRoot, path);
 	const srcFile = Path.basename(srcPath);
 
