@@ -11,88 +11,74 @@ describe("Unit tests", function suite() {
 
 	});
 
-	it("should install local file link and copy", () => {
-		return common.cmd("local-file", "install").then(({dir, pkg}) => {
-			return common.check(dir, pkg).then(() => {
-				return common.checkFiles(dir, [{
-					path: 'dest/bundle.js',
-					data: "// one\n// two\n"
-				}, {
-					path: 'dest/three.min.css',
-					data: "/* three */\n"
-				}, {
-					path: 'dest/four.min.css',
-					data: "/* four */\n"
-				}, {
-					path: 'dest/texts.txt',
-					data: "text2\ntext1\n"
-				}, {
-					path: 'dest/rec/other.js',
-					data: "// something\n"
-				}, {
-					path: 'dest/rec/dir/deep/test.js',
-					data: "console.log('test.js')\n"
-				}]);
-			});
-		});
+	it("should install local file link and copy", async () => {
+		const { dir, pkg } = await common.cmd("local-file", "install");
+		await common.check(dir, pkg);
+		await common.checkFiles(dir, [{
+			path: 'dest/bundle.js',
+			data: "// one\n// two\n"
+		}, {
+			path: 'dest/three.min.css',
+			data: "/* three */\n"
+		}, {
+			path: 'dest/four.min.css',
+			data: "/* four */\n"
+		}, {
+			path: 'dest/texts.txt',
+			data: "text2\ntext1\n"
+		}, {
+			path: 'dest/rec/other.js',
+			data: "// something\n"
+		}, {
+			path: 'dest/rec/dir/deep/test.js',
+			data: "console.log('test.js')\n"
+		}]);
 	});
 
-	it("should install dependency file link", () => {
-		return common.cmd("dep-file", "install").then(({dir, pkg}) => {
-			return common.check(dir, pkg);
-		});
+	it("should install dependency file link", async () => {
+		const { dir, pkg } = await common.cmd("dep-file", "install");
+		await common.check(dir, pkg);
 	});
 
-	it("should install scoped dependency file link", () => {
-		return common.cmd("scoped-dep-file", "install").then(({dir, pkg}) => {
-			return common.check(dir, pkg);
-		});
+	it("should install scoped dependency file link", async () => {
+		const { dir, pkg } = await common.cmd("scoped-dep-file", "install");
+		await common.check(dir, pkg);
 	});
 
-	it("should install dependency wildcard link", () => {
-		return common.cmd("dep-wildcard", "install").then(({dir, pkg}) => {
-			return common.check(dir, pkg);
-		});
+	it("should install dependency wildcard link", async () => {
+		const { dir, pkg } = await common.cmd("dep-wildcard", "install");
+		await common.check(dir, pkg);
 	});
 
-	// it("should install dependency file installed within dependency", () => {
-	// 	return common.cmd("dep-dep-file", "install").then(({dir, pkg}) => {
-	// 		return common.check(dir, pkg);
-	// 	}).then(() => {
-	// 		return common.cmd("dep-dep-file", "update").then(({dir, pkg}) => {
-	// 			return common.check(dir, pkg);
-	// 		});
-	// 	});
+	// it("should install dependency file installed within dependency", async () => {
+	// 	const { dir, pkg } = await common.cmd("dep-dep-file", "install");
+	// 	await common.check(dir, pkg);
+	// 	const { dir: dir2, pkg: pkg2 } = await common.cmd("dep-dep-file", "update");
+	// 	await common.check(dir2, pkg2);
 	// });
 
-	it("should throw when nothing matches", () => {
-		let err = null;
-		return common.cmd("throw", "install").catch((ex) => {
-			err = ex;
-		}).then((what) => {
-			if (!err) throw new Error("Did not throw");
-		});
+	it("should throw when nothing matches", async () => {
+		await assert.rejects(() => common.cmd("throw", "install"));
 	});
 
-	it("should not execute not whitelisted commands", () => {
-		return common.cmd("whitelist", "install").then(({dir, pkg}) => {
-			return common.check(dir, pkg, {allow: ['link']}).then((count) => {
-				assert.equal(1, count); // 1 because the star is not yet checked
-			});
-		});
+	it("should not execute not whitelisted commands", async () => {
+		const { dir, pkg } = await common.cmd("whitelist", "install");
+		const count = await common.check(dir, pkg, { allow: ['link'] });
+		assert.equal(1, count); // 1 because the star is not yet checked
 	});
 
-	it("should run postinstall module with cwd set properly", () => {
-		return common.cmd("ignore-scripts", ["install", "--ignore-scripts"]).then(({dir, pkg}) => {
-			const cwd = './test/tmp/ignore-scripts';
-			return require('../').process(require('./tmp/ignore-scripts/package.json').postinstall, {
-				cwd: cwd
-			}).then(() => {
-				return common.check(dir, pkg, {cwd: cwd}).then((count) => {
-					assert.equal(1, count);
-				});
-			});
-		});
+	it("should run postinstall module with cwd set properly", async () => {
+		const { dir, pkg } = await common.cmd("ignore-scripts", [
+			"install",
+			"--ignore-scripts"
+		]);
+		const cwd = './test/tmp/ignore-scripts';
+		await require('../').process(
+			require('./tmp/ignore-scripts/package.json').postinstall,
+			{ cwd }
+		);
+		const count = await common.check(dir, pkg, { cwd });
+		assert.equal(1, count);
 	});
 
 });

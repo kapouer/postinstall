@@ -1,27 +1,26 @@
-const pify = require('util').promisify;
+const { promisify: pify } = require('node:util');
 const fs = require('fs-extra');
-const exec = pify(require('child_process').exec);
-const Path = require('path');
+const exec = pify(require('node:child_process').exec);
+const Path = require('node:path');
 const { glob } = require('glob');
-const assert = require('assert');
+const assert = require('node:assert');
 const postinstall = require('../');
 
 const tmpDir = Path.join(__dirname, "tmp");
 
 exports.checkFiles = function(dir, list) {
-	return Promise.all(list.map((test) => {
-		return fs.readFile(Path.join(dir, test.path)).then((buf) => {
-			assert.equal(buf.toString(), test.data);
-		});
+	return Promise.all(list.map(async test => {
+		const buf = await fs.readFile(Path.join(dir, test.path));
+		assert.equal(buf.toString(), test.data);
 	}));
 };
 
-exports.check = function(dir, pkg, opts) {
+exports.check = async function(dir, pkg, opts) {
 	if (!opts) opts = {};
 	const commands = postinstall.prepare(pkg.postinstall || {}, opts);
 	let countCommands = 0;
 	const cwd = opts.cwd || process.cwd();
-	return Promise.all(commands.map((obj) => {
+	await Promise.all(commands.map(async obj => {
 		if (!obj) {
 			return;
 		}
@@ -30,47 +29,41 @@ exports.check = function(dir, pkg, opts) {
 		}
 		const dest = Path.resolve(cwd, Path.join(dir, obj.output));
 		let count = 0;
-		return Promise.resolve().then(() => {
-			if (obj.input.endsWith('*')) return glob(Path.join(dest, '*'), {
-				nosort: true,
-				nobrace: true,
-				noglobstar: true,
-			});
-			else return [dest];
-		}).then((files) => {
-			return Promise.all(files.map((file) => {
-				return fs.lstat(file).then((stat) => {
-					count++;
-					if (obj.cmd == "link") {
-						assert.ok(stat.isSymbolicLink(), `is symbolic link ${file}`);
-					}
-				}).catch((err) => {
-					assert.ifError(err);
-				});
-			})).then(() => {
-				assert.ok(count == files.length, `${count} files should have been installed`);
-			});
-		}).then(() => {
-			countCommands++;
-		});
-	})).then(() => {
-		return countCommands;
-	});
+		const files = obj.input.endsWith('*') ? await glob(Path.join(dest, '*'), {
+			nosort: true,
+			nobrace: true,
+			noglobstar: true,
+		}) : [dest];
+
+		await Promise.all(files.map(async file => {
+			try {
+				const stat = await fs.lstat(file);
+				count++;
+				if (obj.cmd == "link") {
+					assert.ok(stat.isSymbolicLink(), `is symbolic link ${file}`);
+				}
+			} catch (err) {
+				assert.ifError(err);
+			}
+		}));
+		assert.ok(count == files.length, `${count} files should have been installed`);
+		countCommands++;
+	}));
+	return countCommands;
 };
 
-exports.prepare = function() {
-	return fs.remove(tmpDir).then(() => {
-		return fs.copy(Path.join(__dirname, "fixtures"), tmpDir);
-	});
+exports.prepare = async function() {
+	await fs.remove(tmpDir);
+	return fs.copy(Path.join(__dirname, "fixtures"), tmpDir);
 };
 
 exports.cmd = function(dir, cmd) {
 	return run(Path.join(tmpDir, dir), cmd);
 };
 
-function run(dir, cmd) {
+async function run(dir, cmd) {
 	if (!Array.isArray(cmd)) cmd = [cmd];
-	return exec("npm " + cmd.join(' '), {
+	const out = await exec("npm " + cmd.join(' '), {
 		cwd: dir,
 		timeout: 10000,
 		env: {
@@ -85,11 +78,9 @@ function run(dir, cmd) {
 			npm_config_offline: 'true',
 			npm_config_audit: 'false'
 		}
-	}).then((out) => {
-		if (out.stderr) console.error(out.stderr);
-		if (out.stdout) console.error(out.stdout);
-		return fs.readFile(Path.join(dir, 'package.json')).then((buf) => {
-			return {dir: dir, pkg: JSON.parse(buf)};
-		});
 	});
+	if (out.stderr) console.error(out.stderr);
+	if (out.stdout) console.error(out.stdout);
+	const buf = await fs.readFile(Path.join(dir, 'package.json'));
+	return {dir: dir, pkg: JSON.parse(buf)};
 }

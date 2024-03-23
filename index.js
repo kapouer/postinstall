@@ -1,8 +1,8 @@
 const { glob } = require('glob');
-const fs = require('fs').promises;
+const { promises: fs } = require('node:fs');
 const resolveFrom = require('resolve-from');
 const resolvePkg = require('resolve-pkg');
-const Path = require('path');
+const Path = require('node:path');
 const minimist = require('minimist');
 
 Object.assign(exports, {
@@ -67,7 +67,7 @@ function prepare(obj, globalOpts) {
 	return list;
 }
 
-function command(cmd, input, output, options = {}, opts = {}) {
+async function command(cmd, input, output, options = {}, opts = {}) {
 	if (!opts.cwd) opts.cwd = process.cwd();
 	else opts.cwd = Path.resolve(opts.cwd);
 
@@ -113,53 +113,51 @@ function command(cmd, input, output, options = {}, opts = {}) {
 	destDir = Path.resolve(opts.cwd, destDir);
 	assertRooted(opts.cwd, destDir);
 
-	return fs.mkdir(destDir, { recursive: true }).then(() => {
-		return glob(slash(srcPath), {
-			nobrace: true,
-			noext: true,
-			nodir: nodir
-		});
-	}).then((paths) => {
-		let list = paths.sort();
-		if (options.list) {
-			if (!nodir && paths.length <= 1) paths.shift();
-			if (paths.length == 0) {
-				list = options.list.map((path) => {
-					return Path.join(srcPath, path);
-				});
-			}
-		}
-		if (bundle || options.list) {
-			return cmdFn(list, output, options);
-		}
-		if (paths.length == 0) {
-			throw new Error(`${cmd} ${output} but no files found at ${srcPath}`);
-		}
-		return Promise.all(paths.map((input) => {
-			let curDestDir = destDir;
-			let outputFile;
-			if (globstar) {
-				const srcRoot = srcPath.split('**')[0];
-				curDestDir = Path.join(destDir, Path.dirname(input.substring(srcRoot.length)));
-				outputFile = Path.basename(input);
-			} else if (star) {
-				const inputFile = Path.basename(input);
-				if (!destFile) {
-					outputFile = inputFile;
-				} else { // bundle == false
-					const regEnd = srcFile.endsWith('*') ? '(.+)$' : '([^\\.]+)';
-					const reg = new RegExp(srcFile.replace(/\*{1,2}/, regEnd));
-					const part = reg.exec(inputFile)[1];
-					outputFile = destFile.replace('*', part);
-				}
-			} else {
-				outputFile = destFile || srcFile;
-			}
-			return fs.mkdir(curDestDir, { recursive: true }).then(() => {
-				return cmdFn([input], Path.join(curDestDir, outputFile), options);
-			});
-		}));
+	await fs.mkdir(destDir, { recursive: true });
+	const paths = await glob(slash(srcPath), {
+		nobrace: true,
+		noext: true,
+		nodir: nodir
 	});
+
+	let list = paths.sort();
+	if (options.list) {
+		if (!nodir && paths.length <= 1) paths.shift();
+		if (paths.length == 0) {
+			list = options.list.map((path) => {
+				return Path.join(srcPath, path);
+			});
+		}
+	}
+	if (bundle || options.list) {
+		return cmdFn(list, output, options);
+	}
+	if (paths.length == 0) {
+		throw new Error(`${cmd} ${output} but no files found at ${srcPath}`);
+	}
+	return Promise.all(paths.map(async input => {
+		let curDestDir = destDir;
+		let outputFile;
+		if (globstar) {
+			const srcRoot = srcPath.split('**')[0];
+			curDestDir = Path.join(destDir, Path.dirname(input.substring(srcRoot.length)));
+			outputFile = Path.basename(input);
+		} else if (star) {
+			const inputFile = Path.basename(input);
+			if (!destFile) {
+				outputFile = inputFile;
+			} else { // bundle == false
+				const regEnd = srcFile.endsWith('*') ? '(.+)$' : '([^\\.]+)';
+				const reg = new RegExp(srcFile.replace(/\*{1,2}/, regEnd));
+				const part = reg.exec(inputFile)[1];
+				outputFile = destFile.replace('*', part);
+			}
+		} else {
+			outputFile = destFile || srcFile;
+		}
+		await fs.mkdir(curDestDir, { recursive: true });
+		return cmdFn([input], Path.join(curDestDir, outputFile), options);
+	}));
 }
 
 function assertRooted(root, path) {

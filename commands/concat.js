@@ -1,7 +1,7 @@
-const fs = require("fs");
+const fs = require("node:fs");
 
 module.exports = function (inputs, output, options) {
-	const to = fs.createWriteStream(output, {flags: 'a'});
+	const to = fs.createWriteStream(output, { flags: 'a' });
 	return new Promise((resolve, reject) => {
 		write(inputs.slice(), to, resolve, reject);
 	});
@@ -22,4 +22,3 @@ function write(files, to, resolve, reject) {
 		resolve();
 	}
 }
-
