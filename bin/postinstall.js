@@ -25,7 +25,10 @@ delete opts._;
 	const buf = await fs.readFile(configFile);
 	const obj = JSON.parse(buf);
 	try {
-		await postinstall.process(obj[process.env.npm_lifecycle_event] || {}, opts);
+		await postinstall.process(
+			obj[process.env.npm_lifecycle_event || 'postinstall'] || {},
+			opts
+		);
 		process.exit(0);
 	} catch (err) {
 		console.error(err);
