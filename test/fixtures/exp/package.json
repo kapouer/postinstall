@@ -1,0 +1,9 @@
+{
+  "name": "exp",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/file.js",
+  "exports": {
+    ".": "./dist/file.js"
+  }
+}

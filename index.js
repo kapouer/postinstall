@@ -1,7 +1,6 @@
 const { glob } = require('glob');
 const { promises: fs } = require('node:fs');
-const resolveFrom = require('resolve-from');
-const resolvePkg = require('resolve-pkg');
+const resolve = require('node:util').promisify(require('resolve'));
 const Path = require('node:path');
 const minimist = require('minimist');
 
@@ -67,34 +66,41 @@ function prepare(obj, globalOpts) {
 	return list;
 }
 
+function parsePath(str) {
+	const parts = str.split('/');
+	let name = parts.shift();
+	if (name.startsWith('@')) name += '/' + parts.shift();
+	return { name, path: parts.join('/') };
+}
+
+function findRoot(name, path) {
+	const comp = '/' + (name == "." ? "" : name);
+	const index = path.lastIndexOf(comp);
+	if (index < 0) return;
+	else return path.substring(0, index + comp.length);
+}
+
 async function command(cmd, input, output, options = {}, opts = {}) {
 	if (!opts.cwd) opts.cwd = process.cwd();
 	else opts.cwd = Path.resolve(opts.cwd);
 
-	let srcPath;
-	const numComps = input.split('/').length;
-	if (input.startsWith('@') && numComps <= 2 || numComps == 1) {
-		srcPath = resolveFrom(opts.cwd, input);
-	} else {
-		srcPath = resolvePkg(input, {
-			cwd: opts.cwd
-		});
+	const { name, path } = parsePath(input);
+	let srcRoot;
+	try {
+		srcRoot = findRoot(name, await resolve(name, {
+			basedir: opts.cwd
+		}));
+	} catch {
+		srcRoot = Path.resolve(opts.cwd, name); // local
 	}
-	if (!srcPath) try {
-		srcPath = require.resolve(input, {
-			paths: [opts.cwd]
-		});
-	} catch (err) {
-		// ignore
-	}
-	if (!srcPath) srcPath = Path.resolve(opts.cwd, input);
+	const srcPath = Path.join(srcRoot, path);
 	const srcFile = Path.basename(srcPath);
 
 	let cmdFn;
 	if (cmd == "link" || cmd == "copy" || cmd == "concat") {
 		cmdFn = require(`./commands/${cmd}`);
 	} else {
-		cmdFn = require(resolveFrom(opts.cwd, `postinstall-${cmd}`));
+		cmdFn = require(require.resolve(`postinstall-${cmd}`, { paths: [opts.cwd]}));
 	}
 
 	let destDir, destFile;
