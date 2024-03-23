@@ -87,21 +87,19 @@ async function command(cmd, input, output, options = {}, opts = {}) {
 	const { name, path } = parsePath(input);
 	let srcRoot;
 	try {
-		srcRoot = findRoot(name, await resolve(name, {
+		srcRoot = await resolve(name, {
 			basedir: opts.cwd
-		}));
+		});
 	} catch {
 		// pass
 	}
 	if (!srcRoot) try {
-		srcRoot = findRoot(name,
-			require.resolve(name + '/package.json', { paths: [opts.cwd] })
-		);
+		srcRoot = require.resolve(name + '/package.json', { paths: [opts.cwd] });
 	} catch {
 		// pass
 	}
 	if (!srcRoot) srcRoot = Path.resolve(opts.cwd, name); // local
-	const srcPath = Path.join(srcRoot, path);
+	const srcPath = path ? Path.join(findRoot(name, srcRoot), path) : srcRoot;
 	const srcFile = Path.basename(srcPath);
 
 	let cmdFn;
