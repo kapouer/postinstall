@@ -183,3 +183,12 @@ postinstall.process(config, {
 // or call manually
 postinstall.command(name, input, output, options);
 ```
+
+## debugging in vscode
+
+To stop on breakpoints the script must be run directly, e.g.
+
+```bash
+cd test/tmp/whitelist
+npm_lifecycle_event=postinstall ../../../bin/postinstall.js
+```
