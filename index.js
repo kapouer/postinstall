@@ -74,10 +74,13 @@ function parsePath(str) {
 }
 
 function findRoot(name, path) {
-	const comp = '/' + (name == "." ? "" : name);
+	if (Path.extname(path) != "") path = Path.dirname(path);
+	if (name == ".") return path;
+	path += '/';
+	const comp = '/' + name + '/';
 	const index = path.lastIndexOf(comp);
 	if (index < 0) return;
-	else return path.substring(0, index + comp.length);
+	else return path.substring(0, index + comp.length - 1);
 }
 
 async function command(cmd, input, output, options = {}, opts = {}) {
@@ -94,7 +97,7 @@ async function command(cmd, input, output, options = {}, opts = {}) {
 		// pass
 	}
 	if (!srcRoot) try {
-		srcRoot = require.resolve(name + '/package.json', { paths: [opts.cwd] });
+		srcRoot = Path.dirname(require.resolve(name + '/package.json', { paths: [opts.cwd] }));
 	} catch {
 		// pass
 	}
