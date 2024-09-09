@@ -97,7 +97,10 @@ async function command(cmd, input, output, options = {}, opts = {}) {
 		// pass
 	}
 	if (!srcRoot) try {
-		srcRoot = Path.dirname(require.resolve(name + '/package.json', { paths: [opts.cwd] }));
+		srcRoot = Path.dirname(
+			await resolve(name + '/package.json', {
+				basedir: opts.cwd
+			}));
 	} catch {
 		// pass
 	}
