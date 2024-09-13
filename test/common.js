@@ -63,7 +63,7 @@ exports.cmd = function(dir, cmd) {
 
 async function run(dir, cmd) {
 	if (!Array.isArray(cmd)) cmd = [cmd];
-	const out = await exec("npm " + cmd.join(' '), {
+	const out = await exec("pnpm " + cmd.join(' '), {
 		cwd: dir,
 		timeout: 10000,
 		env: {
