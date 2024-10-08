@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/kapouer/postinstall#readme",
   "dependencies": {
-    "@danieldietrich/copy": "^0.4.2",
-    "glob": "^7.1.7",
-    "minimist": "^1.2.5",
-    "resolve-from": "^5.0.0",
-    "resolve-pkg": "^2.0.0"
+    "@danieldietrich/copy": "0.4.2",
+    "glob": "7.1.7",
+    "minimist": "1.2.5",
+    "resolve-from": "5.0.0",
+    "resolve-pkg": "2.0.0"
   },
   "devDependencies": {
     "@kapouer/eslint-config": "^1.5.1",
