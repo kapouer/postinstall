@@ -58,4 +58,4 @@ typings/
 .env
 
 /test/tmp
-
+/pnpm-lock.yaml
