@@ -33,7 +33,8 @@
   "devDependencies": {
     "@kapouer/eslint-config": "^2.0.0",
     "fs-extra": "^11.3.0",
-    "mocha": "^11.2.2"
+    "mocha": "^11.2.2",
+    "pnpm": "^10.10.0"
   },
   "mocha": {
     "spec": "test/unit.js"
