@@ -76,7 +76,7 @@ function parsePath(str) {
 function findRoot(name, path) {
 	if (Path.extname(path) != "") path = Path.dirname(path);
 	if (name == ".") return path;
-	path += '/';
+	path = slash(path) + '/';
 	const comp = '/' + name + '/';
 	const index = path.lastIndexOf(comp);
 	if (index < 0) return;
